@@ -304,12 +304,14 @@ finalData_salary21 <- salaryCF21 %>%
                     "position")) %>%
   inner_join(finalData_salaryMPPlayer21,
              by = c("PLAYER",
-                    "position"))
+                    "position")) %>%
+  mutate(season = "2021-22")
 
 finalData_salary21 <- finalData_salary21 %>%
   select(PLAYER,
          position,
          team,
+         season,
          everything())
 
 
