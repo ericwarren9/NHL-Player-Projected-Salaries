@@ -314,6 +314,10 @@ finalData_salary19 <- finalData_salary19 %>%
          season,
          everything())
 
+# Clean the data needed to make good variable names
+library(janitor)
+finalData_salary19 <- clean_names(finalData_salary19)
+
 
 # Write csv and rds files to be used for later projects ---------------------------------
 
