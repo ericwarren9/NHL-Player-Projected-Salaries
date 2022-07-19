@@ -100,3 +100,4 @@ best_lambda <- lasso_fit$lambda.min
 best_model <- glmnet(model_x, model_y, alpha = .25, lambda = best_lambda)
 coef(best_model)
 names(best_model$beta[, 1][best_model$beta[, 1] != 0])
+
