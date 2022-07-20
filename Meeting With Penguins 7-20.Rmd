@@ -191,6 +191,7 @@ model_x <- salary21SubsetForward %>%
   select(-cap_hit) %>%
   as.matrix()
 model_y <- salary21SubsetForward$cap_hit
+set.seed(9)
 library(glmnet)
 lasso_fit <- cv.glmnet(model_x, model_y, alpha = 1)
 library(glmnet)
@@ -206,6 +207,7 @@ model_x <- salary21SubsetDefense %>%
   select(-cap_hit) %>%
   as.matrix()
 model_y <- salary21SubsetDefense$cap_hit
+set.seed(9)
 library(glmnet)
 lasso_fit <- cv.glmnet(model_x, model_y, alpha = 1)
 library(glmnet)
@@ -225,7 +227,6 @@ randomNHLRegression <- ranger(cap_hit ~ .,
                               salary21Subset,
                               importance = "impurity",
                               mtry = ncol(salary21Subset) / 3)
-randomNHLRegression
 
 # Find the variable importance
 library(vip)
@@ -254,7 +255,6 @@ randomNHLRegressionForward <- ranger(cap_hit ~ .,
                               importance = "impurity",
                               num.trees = 400,
                               mtry = ncol(salary21SubsetForward) / 3)
-randomNHLRegressionForward
 
 vip(randomNHLRegressionForward,
     geom = "col",
@@ -280,7 +280,6 @@ randomNHLRegressionDefense <- ranger(cap_hit ~ .,
                                      importance = "impurity",
                                      num.trees = 400,
                                      mtry = ncol(salary21SubsetDefense) / 3)
-randomNHLRegressionDefense
 
 vip(randomNHLRegressionDefense,
     geom = "col",
