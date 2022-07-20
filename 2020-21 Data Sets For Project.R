@@ -316,7 +316,8 @@ finalData_salary20 <- finalData_salary20 %>%
 
 # Clean the data needed to make good variable names
 library(janitor)
-finalData_salary20 <- clean_names(finalData_salary20)
+finalData_salary20 <- clean_names(finalData_salary20) %>%
+  rename(plusMinus = x)
 
 
 # Write csv and rds files to be used for later projects ---------------------------------
