@@ -95,7 +95,11 @@ salaryCF21 <- salaryCF21 %>%
   mutate(position = ifelse(POS %in% c("LW", "C", "RW"), "F", POS),
          position = ifelse(POS %in% c("LD", "RD", "D"), "D", position)) %>%
   select(-POS) %>%
-  select(PLAYER, position, everything())
+  select(PLAYER, position, everything()) %>%
+  select(- c(contains("x"),
+             `CAP HIT %`,
+             contains("60"),
+             contains("%")))
 
 
 
@@ -106,6 +110,7 @@ salaryMPPlayer21 <- read_csv("RawData/skatersMP2021-22.csv")
 
 # Get rid of not needed variables
 salaryMPPlayer21 <- salaryMPPlayer21  %>%
+  mutate(assists = I_F_primaryAssists + I_F_secondaryAssists) %>%
   select(-c(playerId,
             season,
             contains("shifts"),
@@ -123,7 +128,9 @@ salaryMPPlayer21 <- salaryMPPlayer21  %>%
             I_F_xGoals_with_earned_rebounds,
             I_F_flyShiftEnds,
             I_F_faceOffsWon,
-            I_F_penalityMinutes))
+            I_F_penalityMinutes,
+            I_F_primaryAssists,
+            I_F_secondaryAssists))
 
 # Make positions into forwards and defense
 salaryMPPlayer21 <- salaryMPPlayer21 %>%
@@ -250,7 +257,26 @@ finalData_salaryMPPlayer21 <- nhl_diff_table %>%
                     "position")) %>%
   inner_join(salaryMPPlayer21_neededVariables,
              by = c("PLAYER",
-                    "position"))
+                    "position")) %>%
+  select(-c(contains("other"),
+            contains("x"),
+            contains("shotAttempts"),
+            contains("lowDanger"),
+            contains("mediumDanger"),
+            contains("rebounds"),
+            contains("missedShots"),
+            contains("reboundGoals"),
+            diff_4on5_shotsOnGoal,
+            contains("diff_4on5_high"),
+            contains("diff_5on4_high"),
+            diff_4on5_shotsOnGoal,
+            contains("points"),
+            contains("playContinued"),
+            contains("savedShotsOnGoal"),
+            contains("dZoneGive"),
+            contains("ZoneShiftEnd"),
+            contains("timeOnBench"),
+            contains("numberOfPen")))
 
 
 
