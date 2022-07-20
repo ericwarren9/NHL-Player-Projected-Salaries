@@ -96,8 +96,57 @@ holdout_predictions %>%
                color = "red")
 
 # Find the most important variables
+library(glmnet)
 best_lambda <- lasso_fit$lambda.min
-best_model <- glmnet(model_x, model_y, alpha = .25, lambda = best_lambda)
+best_model <- glmnet(model_x, model_y, alpha = 1, lambda = best_lambda)
 coef(best_model)
-names(best_model$beta[, 1][best_model$beta[, 1] != 0])
+importantLassoNames <- names(best_model$beta[, 1][best_model$beta[, 1] != 0])
+saveRDS(importantLassoNames, file = "RawData/lasso_important_names.rds")
 
+
+# Forward Lasso Model -----------------------------------------------------
+
+# Make the needed matrices
+salary21SubsetForward <- salary21Subset%>%
+  filter(position == 2)
+model_x <- salary21SubsetForward %>%
+  select(-cap_hit) %>%
+  as.matrix()
+model_y <- salary21SubsetForward$cap_hit
+
+# Make the lasso fit plot
+library(glmnet)
+lasso_fit <- cv.glmnet(model_x, model_y, alpha = 1)
+plot(lasso_fit)
+
+# Find the most important variables
+library(glmnet)
+best_lambda <- lasso_fit$lambda.min
+best_model <- glmnet(model_x, model_y, alpha = 1, lambda = best_lambda)
+coef(best_model)
+importantLassoNames <- names(best_model$beta[, 1][best_model$beta[, 1] != 0])
+saveRDS(importantLassoNames, file = "RawData/lasso_important_names_forward.rds")
+
+
+# Defense Lasso Model -----------------------------------------------------
+
+# Make the needed matrices
+salary21SubsetDefense <- salary21Subset%>%
+  filter(position == 1)
+model_x <- salary21SubsetDefense %>%
+  select(-cap_hit) %>%
+  as.matrix()
+model_y <- salary21SubsetDefense$cap_hit
+
+# Make the lasso fit plot
+library(glmnet)
+lasso_fit <- cv.glmnet(model_x, model_y, alpha = 1)
+plot(lasso_fit)
+
+# Find the most important variables
+library(glmnet)
+best_lambda <- lasso_fit$lambda.min
+best_model <- glmnet(model_x, model_y, alpha = 1, lambda = best_lambda)
+coef(best_model)
+importantLassoNames <- names(best_model$beta[, 1][best_model$beta[, 1] != 0])
+saveRDS(importantLassoNames, file = "RawData/lasso_important_names_defense.rds")
