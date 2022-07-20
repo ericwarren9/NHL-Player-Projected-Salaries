@@ -196,7 +196,6 @@ lasso_fit <- cv.glmnet(model_x, model_y, alpha = 1)
 library(glmnet)
 best_lambda <- lasso_fit$lambda.min
 best_model <- glmnet(model_x, model_y, alpha = 1, lambda = best_lambda)
-coef(best_model)
 importantLassoNames <- names(best_model$beta[, 1][best_model$beta[, 1] != 0])
 saveRDS(importantLassoNames, file = "RawData/lasso_important_names_forward.rds")
 
@@ -212,7 +211,6 @@ lasso_fit <- cv.glmnet(model_x, model_y, alpha = 1)
 library(glmnet)
 best_lambda <- lasso_fit$lambda.min
 best_model <- glmnet(model_x, model_y, alpha = 1, lambda = best_lambda)
-coef(best_model)
 importantLassoNames <- names(best_model$beta[, 1][best_model$beta[, 1] != 0])
 saveRDS(importantLassoNames, file = "RawData/lasso_important_names_defense.rds")
 ```
