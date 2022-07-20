@@ -1,0 +1,360 @@
+---
+title: "Meeting With the Penguins"
+author: "Eric Warren and Hailey Jensen"
+date: '2022-07-20'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE, 
+                      message = FALSE,
+                      fig.width=14, 
+                      fig.height=9)
+```
+
+```{r load in}
+library(tidyverse)
+salary21 <- read_csv("UsedDataForProject/NHL Player Stats and Salary 2021-22.csv")
+```
+
+## Statistical EDA Modeling So Far {.tabset}
+
+### Initial Analysis
+
+Here we wanted to show the number of games being played by players to quickly discuss this. We thought going with a 20 game minimum was the best idea for analysis.
+```{r games}
+salary21 %>%
+  ggplot(aes(x = games_played)) +
+  stat_bin(binwidth = 5,
+                 geom="text", 
+                 aes(label=after_stat(count)), 
+                 vjust=0) +
+  theme_bw()
+```
+
+### PCA
+
+We did Principal Component Analysis to show if any variables stand out more than others.
+
+We wanted to show with elbow plot that not many components were really needed. Note we took out the "Entry Level Contract" type and filtered that players must have played 20 games
+```{r pca elbow plot}
+library(stats)
+# Change to dummy data set
+salary21Updated <- salary21 %>%
+  filter(games_played >= 20,
+         type != "Entry_Level")
+# Change to factor data from character
+salary21Updated[sapply(salary21Updated, is.character)] <- lapply(salary21Updated[sapply(salary21Updated, is.character)], as.factor)
+# Change to numeric data
+salary21Updated[sapply(salary21Updated, is.factor)] <- lapply(salary21Updated[sapply(salary21Updated, is.factor)], as.numeric)
+# Omit na's
+salary21Updated <- salary21Updated %>%
+  na.omit()
+# Make models
+model_CAPHIT <- as.matrix(select(salary21Updated, -cap_hit))
+# Only use variables that don't have zero variance
+model_CAPHIT <- model_CAPHIT[ , which(apply(model_CAPHIT, 2, var) != 0)]
+pca_CAPHIT <- prcomp(model_CAPHIT, center = T, scale. = T)
+# Make an elbow plot
+library(broom)
+pca_CAPHIT %>%
+  tidy(matrix = "eigenvalues") %>%
+  ggplot(aes(x = PC,
+             y = percent)) +
+  geom_line() +
+  geom_point() +
+  geom_hline(yintercept = 1 / ncol(model_CAPHIT),
+             color = "cornflowerblue",
+             linetype = "dashed") +
+  theme_bw()
+```
+
+We then wanted to see in the first two components what variables had the most weight as this could help us in our reduction methods.
+```{r pca vectors}
+# Look at what vectors have the most impact
+arrow_style <- arrow(
+  angle = 20, ends = "first", type = "closed", 
+  length = grid::unit(8, "pt")
+)
+library(ggrepel)
+pca_CAPHIT %>%
+  tidy(matrix = "rotation") %>%
+  pivot_wider(names_from = "PC", names_prefix = "PC", 
+              values_from = "value") %>%
+  mutate(stat_type = ifelse(str_detect(column, "all"), "all",
+                            ifelse(str_detect(column, "5on4"), "5on4",
+                                   ifelse(str_detect(column, "4on5"), "4on5", 
+                                          ifelse(str_detect(column, "5on5"), "5on5", 
+                                                 ifelse(str_detect(column, "other"), "other", "category")))))) %>%
+  ggplot(aes(PC1, PC2)) +
+  geom_segment(xend = 0, yend = 0, arrow = arrow_style) +
+  geom_text_repel(aes(label = column,
+                      color = stat_type),
+                  size = 3) +
+  scale_color_manual(values = c("orange", "green", "brown", "cornflowerblue", "purple", "grey")) +
+  theme_bw() + 
+  theme(legend.position = "bottom")
+```
+
+### Lasso/Ridge Regression
+
+```{r initial lasso}
+salary21Subset <- salary21 %>%
+  select(-c(player,
+            cap_hit_percent,
+            season)) %>% 
+  filter(games_played >= 20,
+         type != "Entry_Level")
+# Change to factor data from character
+salary21Subset[sapply(salary21Subset, is.character)] <- lapply(salary21Subset[sapply(salary21Subset, is.character)], as.factor)
+# Change to numeric data
+salary21Subset[sapply(salary21Subset, is.factor)] <- lapply(salary21Subset[sapply(salary21Subset, is.factor)], as.numeric)
+```
+
+We wanted to show what the ridge plot looks like.
+```{r ridge plot}
+# Make the needed matrices
+model_x <- salary21Subset %>%
+  select(-cap_hit) %>%
+  as.matrix()
+model_y <- salary21Subset$cap_hit
+library(glmnet)
+ridge_fit <- cv.glmnet(model_x, model_y, alpha = 0)
+plot(ridge_fit)
+```
+
+Also wanted to show the lasso plot.
+```{r lasso plot}
+lasso_fit <- cv.glmnet(model_x, model_y, alpha = 1)
+plot(lasso_fit)
+```
+
+Next, we wanted to show how all the models compared. We took the linear regression model and compared it to ridge (which has an alpha level of 0) and increased the alpha by every quartile until it got up to 1 (which is a lasso model). Here we wanted to show which model was the best.
+```{r best ridge/lasso model}
+# Do comparison of models for holdout performance
+set.seed(9)
+salary21Subset <- salary21Subset %>% mutate(test_fold = sample(rep(1:5, length.out = n())))
+holdout_predictions <- 
+  map_dfr(unique(salary21Subset$test_fold), 
+          function(holdout) {
+            # Separate test and training data:
+            test_data <- salary21Subset %>% filter(test_fold == holdout)
+            train_data <- salary21Subset %>% filter(test_fold != holdout)
+            # Repeat for matrices
+            test_x <- as.matrix(dplyr::select(test_data, -cap_hit))
+            train_x <- as.matrix(dplyr::select(train_data, -cap_hit))
+            # Train models:
+            lm_model <- lm(cap_hit ~ ., data = train_data)
+            ridge_model <- cv.glmnet(train_x, train_data$cap_hit, alpha = 0)
+            lasso_model <- cv.glmnet(train_x, train_data$cap_hit, alpha = 1)
+            en_model <- cv.glmnet(train_x, train_data$cap_hit, alpha = .5)
+            quarter_model <- cv.glmnet(train_x, train_data$cap_hit, alpha = .25)
+            three_quarter_model <- cv.glmnet(train_x, train_data$cap_hit, alpha = .75)
+            # Return tibble of holdout results:
+            tibble(lm_preds = predict(lm_model, newdata = test_data),
+                   ridge_preds = as.numeric(predict(ridge_model, newx = test_x)),
+                   lasso_preds = as.numeric(predict(lasso_model, newx = test_x)),
+                   en_preds = as.numeric(predict(en_model, newx = test_x)),
+                   quarter_preds = as.numeric(predict(quarter_model, newx = test_x)),
+                   three_quarter_preds = as.numeric(predict(three_quarter_model, newx = test_x)),
+                   test_actual = test_data$cap_hit, test_fold = holdout) 
+          })
+
+# Compute the RMSE across folds with standard error intervals
+holdout_predictions %>%
+  pivot_longer(lm_preds:three_quarter_preds, 
+               names_to = "type", values_to = "test_preds") %>%
+  group_by(type, test_fold) %>%
+  summarize(rmse =
+              sqrt(mean((test_actual - test_preds) ** 2))) %>% 
+  ggplot(aes(x = type, y = rmse)) + 
+  geom_point() + theme_bw() +
+  stat_summary(fun = mean, geom = "point", 
+               color = "red") + 
+  stat_summary(fun.data = mean_se, geom = "errorbar",
+               color = "red")
+```
+
+```{r most important variables lasso}
+# Find the most important variables for all data
+library(glmnet)
+best_lambda <- lasso_fit$lambda.min
+best_model <- glmnet(model_x, model_y, alpha = 1, lambda = best_lambda)
+importantLassoNames <- names(best_model$beta[, 1][best_model$beta[, 1] != 0])
+saveRDS(importantLassoNames, file = "RawData/lasso_important_names.rds")
+
+# Find most important variables for forwards
+salary21SubsetForward <- salary21Subset%>%
+  filter(position == 2)
+model_x <- salary21SubsetForward %>%
+  select(-cap_hit) %>%
+  as.matrix()
+model_y <- salary21SubsetForward$cap_hit
+library(glmnet)
+lasso_fit <- cv.glmnet(model_x, model_y, alpha = 1)
+library(glmnet)
+best_lambda <- lasso_fit$lambda.min
+best_model <- glmnet(model_x, model_y, alpha = 1, lambda = best_lambda)
+coef(best_model)
+importantLassoNames <- names(best_model$beta[, 1][best_model$beta[, 1] != 0])
+saveRDS(importantLassoNames, file = "RawData/lasso_important_names_forward.rds")
+
+# Find the most important variables for defense
+salary21SubsetDefense <- salary21Subset%>%
+  filter(position == 1)
+model_x <- salary21SubsetDefense %>%
+  select(-cap_hit) %>%
+  as.matrix()
+model_y <- salary21SubsetDefense$cap_hit
+library(glmnet)
+lasso_fit <- cv.glmnet(model_x, model_y, alpha = 1)
+library(glmnet)
+best_lambda <- lasso_fit$lambda.min
+best_model <- glmnet(model_x, model_y, alpha = 1, lambda = best_lambda)
+coef(best_model)
+importantLassoNames <- names(best_model$beta[, 1][best_model$beta[, 1] != 0])
+saveRDS(importantLassoNames, file = "RawData/lasso_important_names_defense.rds")
+```
+
+### Random Forest
+
+Here we wanted to show a plot of the top 100 most important variables in this type of dimension reduction technique.
+```{r random forest plot all}
+set.seed(9)
+library(ranger)
+randomNHLRegression <- ranger(cap_hit ~ .,
+                              salary21Subset,
+                              importance = "impurity",
+                              mtry = ncol(salary21Subset) / 3)
+randomNHLRegression
+
+# Find the variable importance
+library(vip)
+vip(randomNHLRegression,
+    geom = "col",
+    num_features = 100L) +
+  theme_bw()
+
+# Table of the most important variables
+vi_scores <- vi(randomNHLRegression,
+                sort = T,
+                decreasing = T,
+                rank = T) %>%
+  top_n(-100)
+```
+
+We did the same thing subsetting the data by forwards.
+```{r random forest plot forward}
+salary21SubsetForward <- salary21Subset %>%
+  filter(position == 2) %>%
+  select(-position)
+
+set.seed(9)
+randomNHLRegressionForward <- ranger(cap_hit ~ .,
+                              salary21SubsetForward,
+                              importance = "impurity",
+                              num.trees = 400,
+                              mtry = ncol(salary21SubsetForward) / 3)
+randomNHLRegressionForward
+
+vip(randomNHLRegressionForward,
+    geom = "col",
+    num_features = 100L) +
+  theme_bw()
+
+vi_scoresForward <- vi(randomNHLRegressionForward,
+                sort = T,
+                decreasing = T,
+                rank = T) %>%
+  top_n(-100)
+```
+
+And lastly did the same random forest technique subsetting it by defense.
+```{r random forest plot defense}
+salary21SubsetDefense <- salary21Subset %>%
+  filter(position == 1) %>%
+  select(-position)
+
+set.seed(9)
+randomNHLRegressionDefense <- ranger(cap_hit ~ .,
+                                     salary21SubsetDefense,
+                                     importance = "impurity",
+                                     num.trees = 400,
+                                     mtry = ncol(salary21SubsetDefense) / 3)
+randomNHLRegressionDefense
+
+vip(randomNHLRegressionDefense,
+    geom = "col",
+    num_features = 100L) +
+  theme_bw()
+
+vi_scoresDefense <- vi(randomNHLRegressionDefense,
+                       sort = T,
+                       decreasing = T,
+                       rank = T) %>%
+  top_n(-100)
+```
+
+### Trying to find the most important variables
+
+By having these different plots, we tried to see if we could find a pattern somewhere that would give us the most important variables to use in our reduction.
+
+We first looked at the all data, without subsetting by position.
+```{r reduction best variables}
+importantLassoNames <- readRDS("RawData/lasso_important_names.rds")
+importantLassoNames <- as.data.frame(importantLassoNames) %>%
+  rename(Variable = importantLassoNames)
+
+knownNames <- rbind(as.tibble(importantLassoNames$Variable),
+                    as.tibble(vi_scores$Variable))
+mostImportantVariables <- knownNames %>%
+  count(value) %>%
+  arrange(desc(n))
+mostImportantVariables
+```
+
+We then did the same doing by forwards.
+```{r reduction best variables forward}
+importantLassoNamesForward <- readRDS("RawData/lasso_important_names_forward.rds")
+importantLassoNamesForward <- as.data.frame(importantLassoNamesForward) %>%
+  rename(Variable = importantLassoNamesForward)
+knownNamesForward <- rbind(as.tibble(importantLassoNamesForward$Variable),
+                    as.tibble(vi_scoresForward$Variable))
+mostImportantVariablesForward <- knownNamesForward %>%
+  count(value) %>%
+  arrange(desc(n))
+mostImportantVariablesForward
+```
+
+And lastly looked at the defensive players.
+```{r reduction best variables defense}
+importantLassoNamesDefense <- readRDS("RawData/lasso_important_names_defense.rds")
+importantLassoNamesDefense <- as.data.frame(importantLassoNamesDefense) %>%
+  rename(Variable = importantLassoNamesDefense)
+knownNamesDefense <- rbind(as.tibble(importantLassoNamesForward$Variable),
+                          as.tibble(vi_scoresDefense$Variable))
+mostImportantVariablesDefense <- knownNamesDefense %>%
+  count(value) %>%
+  arrange(desc(n))
+mostImportantVariablesDefense
+```
+
+By using random forest, we could look at what the model says is the optimal number of predictors we should end up using.
+```{r predictor number plot}
+# Tune the random forests
+library(caret)
+rf_tune_grid <- 
+  expand.grid(mtry = seq(3, 150, by = 3), 
+              splitrule = "variance",
+              min.node.size = 5)
+set.seed(9)
+caret_nhl_rf <- 
+  train(cap_hit ~ ., 
+        data = salary21Subset,
+        method = "ranger", 
+        num.trees = 150,
+        trControl = trainControl(method = "cv", number = 5),
+        tuneGrid = rf_tune_grid)
+ggplot(caret_nhl_rf) + theme_bw()
+```
