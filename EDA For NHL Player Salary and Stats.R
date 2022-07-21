@@ -165,7 +165,6 @@ library(broom)
 tidy(test_lm_nhl) %>%
   mutate(coef_sign = as.factor(sign(estimate)),
          term = fct_reorder(term, estimate)) %>%
-  # top_n(50, estimate) %>%
   ggplot(aes(x = term, y = estimate, fill = coef_sign)) +
   geom_bar(stat = "identity", 
            color = "green") +
@@ -174,6 +173,43 @@ tidy(test_lm_nhl) %>%
   coord_flip() + 
   theme_bw()
 
+# Look at what variables have the highest absolute value
+nhl_lm_variable_weight_compare <- abs(test_lm_nhl$coefficients)
+nhl_lm_variable_weight_compare <- nhl_lm_variable_weight_compare[order(nhl_lm_variable_weight_compare, decreasing = T)]
+nhl_lm_variable_weight_compare_names <- nhl_lm_variable_weight_compare %>%
+  names() %>% 
+  as.data.frame()
+colnames(nhl_lm_variable_weight_compare_names) <- "Variable"
+nhl_lm_variable_weight_compare_names <- head(nhl_lm_variable_weight_compare_names, 50)
+write_rds(nhl_lm_variable_weight_compare_names, file = "RawData/lm_important_names.rds")
+
+# Now look at forwards
+salaryAllSeasonsNoCharacterDataForward <- salaryAllSeasonsUpdated %>%
+  filter(position == 2) %>% 
+  select(which(sapply(salaryAllSeasons, class) != 'character'))
+test_lm_nhl <- lm(cap_hit ~ ., salaryAllSeasonsNoCharacterDataForward)
+nhl_lm_variable_weight_compare <- abs(test_lm_nhl$coefficients)
+nhl_lm_variable_weight_compare <- nhl_lm_variable_weight_compare[order(nhl_lm_variable_weight_compare, decreasing = T)]
+nhl_lm_variable_weight_compare_names <- nhl_lm_variable_weight_compare %>%
+  names() %>% 
+  as.data.frame()
+colnames(nhl_lm_variable_weight_compare_names) <- "Variable"
+nhl_lm_variable_weight_compare_names <- head(nhl_lm_variable_weight_compare_names, 50)
+write_rds(nhl_lm_variable_weight_compare_names, file = "RawData/lm_important_names_forward.rds")
+
+# Now look at defense
+salaryAllSeasonsNoCharacterDataForward <- salaryAllSeasonsUpdated %>%
+  filter(position == 1) %>% 
+  select(which(sapply(salaryAllSeasons, class) != 'character'))
+test_lm_nhl <- lm(cap_hit ~ ., salaryAllSeasonsNoCharacterDataForward)
+nhl_lm_variable_weight_compare <- abs(test_lm_nhl$coefficients)
+nhl_lm_variable_weight_compare <- nhl_lm_variable_weight_compare[order(nhl_lm_variable_weight_compare, decreasing = T)]
+nhl_lm_variable_weight_compare_names <- nhl_lm_variable_weight_compare %>%
+  names() %>% 
+  as.data.frame()
+colnames(nhl_lm_variable_weight_compare_names) <- "Variable"
+nhl_lm_variable_weight_compare_names <- head(nhl_lm_variable_weight_compare_names, 50)
+write_rds(nhl_lm_variable_weight_compare_names, file = "RawData/lm_important_names_defense.rds")
 
 
 # Look at the correlations between different variables --------------------
