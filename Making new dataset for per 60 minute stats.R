@@ -120,6 +120,9 @@ salaryAllSeasonsPer60Minutes <- salaryAllSeasons %>%
          type,
          everything())
 
+# Change NA's to zero
+salaryAllSeasonsPer60Minutes[is.na(salaryAllSeasonsPer60Minutes)] = 0
+
 # Write csv file for per 60 minutes and standardized stats
 write_csv(salaryAllSeasonsPer60Minutes, "UsedDataForProject/NHL Player Stats and Salary Per 60 Minutes and Standardized 2019-22.csv")
 
