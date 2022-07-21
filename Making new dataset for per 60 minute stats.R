@@ -91,14 +91,34 @@ salaryAllSeasonsPer60Minutes <- salaryAllSeasons %>%
   mutate(std_all_icetime = as.numeric(scale(all_icetime, center = TRUE, scale = TRUE)),
          std_5on5_icetime = as.numeric(scale(x5on5_icetime, center = TRUE, scale = TRUE)),
          std_5on4_icetime = as.numeric(scale(x5on4_icetime, center = TRUE, scale = TRUE)),
-         std_4on5_icetime = as.numeric(scale(x4on5_icetime, center = TRUE, scale = TRUE))) %>%
+         std_4on5_icetime = as.numeric(scale(x4on5_icetime, center = TRUE, scale = TRUE)),
+         std_power_play_goals = as.numeric(scale(skater_stats_power_play_goals, center = TRUE, scale = TRUE)),
+         std_shorthanded_goals = as.numeric(scale(skater_stats_short_handed_goals, center = TRUE, scale = TRUE)),
+         std_power_play_assists = as.numeric(scale(skater_stats_power_play_assists, center = TRUE, scale = TRUE)),
+         std_shorthanded_assists = as.numeric(scale(skater_stats_short_handed_assists, center = TRUE, scale = TRUE)),
+         std_plus_minus = as.numeric(scale(plusMinus, center = TRUE, scale = TRUE))) %>%
   select(-c(all_icetime,
             x5on5_icetime,
             x5on4_icetime,
             x4on5_icetime,
             diff_4on5_goals,
             diff_5on4_goals,
-            diff_5on4_shots_on_goal))
+            diff_5on4_shots_on_goal,
+            skater_stats_power_play_assists,
+            skater_stats_power_play_goals,
+            skater_stats_short_handed_goals,
+            skater_stats_short_handed_assists,
+            plusMinus)) %>%
+  select(player,
+         position,
+         team,
+         age,
+         shoots_catches,
+         season,
+         games_played,
+         cap_hit,
+         type,
+         everything())
 
 # Write csv file for per 60 minutes and standardized stats
 write_csv(salaryAllSeasonsPer60Minutes, "UsedDataForProject/NHL Player Stats and Salary Per 60 Minutes and Standardized 2019-22.csv")
