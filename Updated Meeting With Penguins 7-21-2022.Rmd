@@ -228,6 +228,7 @@ get_cv_preds <- function(model_formula, data) {
 }
 
 # Look at RMSE of different regression models
+set.seed(9)
 all_cv_preds <- get_cv_preds(cap_hit ~ ., salaryAllSeasonsNoCharacterData)
 
 salaryAllSeasonsNoCharacterDataJustAll <-
