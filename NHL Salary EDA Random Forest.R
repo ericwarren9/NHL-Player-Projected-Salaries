@@ -10,7 +10,6 @@ library(stats)
 # Change to dummy data set
 salaryAllSeasonsSubset <- salaryAllSeasons %>%
   select(-c(player,
-            cap_hit_percent,
             season)) %>%
   filter(games_played >= 20,
          type != "Entry_Level")
@@ -95,36 +94,43 @@ vi_scoresDefense <- vi(randomNHLRegressionDefense,
 
 # See what variables show up the most for whole dataset and position data
 importantLassoNames <- readRDS("RawData/lasso_important_names.rds")
+importantLmNames <- readRDS("RawData/lm_important_names.rds")
 importantLassoNames <- as.data.frame(importantLassoNames) %>%
   rename(Variable = importantLassoNames)
 
 # All data
 knownNames <- rbind(as.tibble(importantLassoNames$Variable),
-                    as.tibble(vi_scores$Variable))
+                    as.tibble(vi_scores$Variable),
+                    as.tibble(importantLmNames$Variable))
 
 mostImportantVariables <- knownNames %>%
   count(value) %>%
   arrange(desc(n))
+mostImportantVariables
 
 # Forward Data
 importantLassoNamesForward <- readRDS("RawData/lasso_important_names_forward.rds")
+importantLmNamesForward <- readRDS("RawData/lm_important_names_forward.rds")
 importantLassoNamesForward <- as.data.frame(importantLassoNamesForward) %>%
   rename(Variable = importantLassoNamesForward)
 knownNamesForward <- rbind(as.tibble(importantLassoNamesForward$Variable),
-                    as.tibble(vi_scoresForward$Variable))
+                    as.tibble(vi_scoresForward$Variable),
+                    as.tibble(importantLmNamesForward$Variable))
 mostImportantVariablesForward <- knownNamesForward %>%
   count(value) %>%
   arrange(desc(n))
+mostImportantVariablesForward
 
 # Defense Data
 importantLassoNamesDefense <- readRDS("RawData/lasso_important_names_defense.rds")
-importantLassoNamesDefense <- as.data.frame(importantLassoNamesDefense) %>%
-  rename(Variable = importantLassoNamesDefense)
+importantLmNamesDefense <- readRDS("RawData/lm_important_names_defense.rds")
 knownNamesDefense <- rbind(as.tibble(importantLassoNamesForward$Variable),
-                           as.tibble(vi_scoresDefense$Variable))
+                           as.tibble(vi_scoresDefense$Variable),
+                           as.tibble(importantLmNamesDefense$Variable))
 mostImportantVariablesDefense <- knownNamesDefense %>%
   count(value) %>%
   arrange(desc(n))
+mostImportantVariablesDefense
 
 
 # Tune the random forests
