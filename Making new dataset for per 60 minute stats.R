@@ -123,5 +123,5 @@ salaryAllSeasonsPer60Minutes <- salaryAllSeasons %>%
 # Write csv file for per 60 minutes and standardized stats
 write_csv(salaryAllSeasonsPer60Minutes, "UsedDataForProject/NHL Player Stats and Salary Per 60 Minutes and Standardized 2019-22.csv")
 
-# Write rds file for per 60 minutes and standarized stats
+# Write rds file for per 60 minutes and standardized stats
 write_rds(salaryAllSeasonsPer60Minutes, "UsedDataForProject/NHL Player Stats and Salary Per 60 Minutes and Standardized 2019-22.rds")
