@@ -34,7 +34,7 @@ test_resp <- salaryAllSeasons$cap_hit[-in_train_set]
 set.seed(9)
 model_tree <- cubist(x = train_pred,
                      y = train_resp,
-                     committees = 10)
+                     committees = 77)
 
 # Get the summary of the model
 summary(model_tree)
@@ -69,7 +69,7 @@ cubistModelResults <- as_tibble(cbind(neighbor, rmse, r_squared))
 set.seed(9)
 model_tree_updated <- cubist(x = train_pred,
                      y = train_resp,
-                     committees = 10,
+                     committees = 77,
                      neighbor = 0)
 
 # Get the summary of the model
