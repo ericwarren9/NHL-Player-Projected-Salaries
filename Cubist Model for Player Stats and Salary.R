@@ -368,6 +368,9 @@ playerSalaryActualAndPrediction19 %>%
 # Combine the seasons back together in one model
 salaryAllSeasonsFinalOutcome <- rbind(salary21, salary20, salary19)
 
+# Change factors back to character data
+salaryAllSeasonsFinalOutcome[sapply(salaryAllSeasonsFinalOutcome, is.factor)] <- lapply(salaryAllSeasonsFinalOutcome[sapply(salaryAllSeasonsFinalOutcome, is.factor)], as.character)
+
 # Look at the salary variables to see how it looks
 playerSalaryActualAndPredictionFinalOutcome <-
   salaryAllSeasonsFinalOutcome %>%
