@@ -343,7 +343,9 @@ finalData_salary18 <- finalData_salary18 %>%
 # Clean the data needed to make good variable names
 library(janitor)
 finalData_salary18 <- clean_names(finalData_salary18) %>%
-  rename(plusMinus = x)
+  rename(plusMinus = x) %>%
+  mutate(total_cap = 79500000,
+         percent_cap_hit = round(cap_hit / total_cap, 6))
 
 
 # Write csv and rds files to be used for later projects ---------------------------------
