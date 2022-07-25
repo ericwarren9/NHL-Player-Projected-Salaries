@@ -9,10 +9,10 @@ salaryAllSeasons <- read_csv("UsedDataForProject/NHL Player Stats and Salary Per
 library(stats)
 # Change to dummy data set
 salaryAllSeasonsSubset <- salaryAllSeasons %>%
-  select(-c(player,
-            season)) %>%
   filter(games_played >= 20,
-         type != "Entry_Level")
+         type != "Entry_Level") %>%
+  select(-c(player,
+            season))
 # Change to factor data from character
 salaryAllSeasonsSubset[sapply(salaryAllSeasonsSubset, is.character)] <- lapply(salaryAllSeasonsSubset[sapply(salaryAllSeasonsSubset, is.character)], as.factor)
 # Change to numeric data
@@ -163,20 +163,18 @@ xgboost_tune_control <- trainControl(method = "cv", number = 5, verboseIter = FA
 
 set.seed(9)
 
-xgb_tune <- train(x = as.matrix(select(salaryAllSeasonsSubset, -cap_hit)),
+xgb_tune <- train(x = as.matrix(dplyr::select(salaryAllSeasonsSubset, -cap_hit)),
                   y = salaryAllSeasonsSubset$cap_hit,
                   trControl = xgboost_tune_control,
                   tuneGrid = xgboost_tune_grid, 
-                  objective = "reg:squarederror",
                   method = "xgbTree",
-                  verbose = TRUE)
+                  objective = "reg:squarederror",
+                  verbose = FALSE)
 
 xgb_fit_final <- xgboost(data = as.matrix(select(salaryAllSeasonsSubset, -cap_hit)),
                          label = salaryAllSeasonsSubset$cap_hit, objective = "reg:squarederror",
                          nrounds = xgb_tune$bestTune$nrounds,
-                         params = as.list(select(xgb_tune$bestTune,
-                                                 -nrounds)), 
-                         verbose = 0)
+                         params = as.list(select(xgb_tune$bestTune, -nrounds)))
 
 vip(xgb_fit_final) + 
   theme_bw()
