@@ -93,6 +93,7 @@ salary21Per60Minutes <- salary21 %>%
          std_shorthanded_goals = as.numeric(scale(skater_stats_short_handed_goals, center = TRUE, scale = TRUE)),
          std_power_play_assists = as.numeric(scale(skater_stats_power_play_assists, center = TRUE, scale = TRUE)),
          std_shorthanded_assists = as.numeric(scale(skater_stats_short_handed_assists, center = TRUE, scale = TRUE)),
+         std_games_played = as.numeric(scale(games_played, center = TRUE, scale = TRUE)),
          std_plus_minus = as.numeric(scale(plusMinus, center = TRUE, scale = TRUE))) %>%
   select(-c(all_icetime,
             x5on5_icetime,
@@ -117,7 +118,7 @@ salary21Per60Minutes <- salary21 %>%
          type,
          everything())
 
-# Do 2021-22 Data ---------------------------------------------------------
+# Do 2020-21 Data ---------------------------------------------------------
 
 # Make per 60 minute stats functions
 per60MinStatsAll <- function(x, na.rm = FALSE) (x / salary20$all_icetime * 3600) # Function for per 60 minute stats in all situations
@@ -194,6 +195,7 @@ salary20Per60Minutes <- salary20 %>%
          std_shorthanded_goals = as.numeric(scale(skater_stats_short_handed_goals, center = TRUE, scale = TRUE)),
          std_power_play_assists = as.numeric(scale(skater_stats_power_play_assists, center = TRUE, scale = TRUE)),
          std_shorthanded_assists = as.numeric(scale(skater_stats_short_handed_assists, center = TRUE, scale = TRUE)),
+         std_games_played = as.numeric(scale(games_played, center = TRUE, scale = TRUE)),
          std_plus_minus = as.numeric(scale(plusMinus, center = TRUE, scale = TRUE))) %>%
   select(-c(all_icetime,
             x5on5_icetime,
@@ -295,6 +297,7 @@ salary19Per60Minutes <- salary19 %>%
          std_shorthanded_goals = as.numeric(scale(skater_stats_short_handed_goals, center = TRUE, scale = TRUE)),
          std_power_play_assists = as.numeric(scale(skater_stats_power_play_assists, center = TRUE, scale = TRUE)),
          std_shorthanded_assists = as.numeric(scale(skater_stats_short_handed_assists, center = TRUE, scale = TRUE)),
+         std_games_played = as.numeric(scale(games_played, center = TRUE, scale = TRUE)),
          std_plus_minus = as.numeric(scale(plusMinus, center = TRUE, scale = TRUE))) %>%
   select(-c(all_icetime,
             x5on5_icetime,
@@ -396,6 +399,7 @@ salary18Per60Minutes <- salary18 %>%
          std_shorthanded_goals = as.numeric(scale(skater_stats_short_handed_goals, center = TRUE, scale = TRUE)),
          std_power_play_assists = as.numeric(scale(skater_stats_power_play_assists, center = TRUE, scale = TRUE)),
          std_shorthanded_assists = as.numeric(scale(skater_stats_short_handed_assists, center = TRUE, scale = TRUE)),
+         std_games_played = as.numeric(scale(games_played, center = TRUE, scale = TRUE)),
          std_plus_minus = as.numeric(scale(plusMinus, center = TRUE, scale = TRUE))) %>%
   select(-c(all_icetime,
             x5on5_icetime,
@@ -497,6 +501,7 @@ salary17Per60Minutes <- salary17 %>%
          std_shorthanded_goals = as.numeric(scale(skater_stats_short_handed_goals, center = TRUE, scale = TRUE)),
          std_power_play_assists = as.numeric(scale(skater_stats_power_play_assists, center = TRUE, scale = TRUE)),
          std_shorthanded_assists = as.numeric(scale(skater_stats_short_handed_assists, center = TRUE, scale = TRUE)),
+         std_games_played = as.numeric(scale(games_played, center = TRUE, scale = TRUE)),
          std_plus_minus = as.numeric(scale(plusMinus, center = TRUE, scale = TRUE))) %>%
   select(-c(all_icetime,
             x5on5_icetime,
@@ -598,6 +603,7 @@ salary16Per60Minutes <- salary16 %>%
          std_shorthanded_goals = as.numeric(scale(skater_stats_short_handed_goals, center = TRUE, scale = TRUE)),
          std_power_play_assists = as.numeric(scale(skater_stats_power_play_assists, center = TRUE, scale = TRUE)),
          std_shorthanded_assists = as.numeric(scale(skater_stats_short_handed_assists, center = TRUE, scale = TRUE)),
+         std_games_played = as.numeric(scale(games_played, center = TRUE, scale = TRUE)),
          std_plus_minus = as.numeric(scale(plusMinus, center = TRUE, scale = TRUE))) %>%
   select(-c(all_icetime,
             x5on5_icetime,
