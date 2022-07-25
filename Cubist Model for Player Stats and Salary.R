@@ -73,7 +73,7 @@ set.seed(9)
 model_tree_updated <- cubist(x = train_pred,
                      y = train_resp,
                      committees = 77,
-                     neighbor = 8)
+                     neighbor = 1)
 
 # Get the summary of the model
 summary(model_tree_updated)
@@ -181,7 +181,7 @@ set.seed(9)
 model_tree_updated <- cubist(x = train_pred,
                              y = train_resp,
                              committees = 77,
-                             neighbor = 2)
+                             neighbor = 5)
 
 # Show predicted values for model
 salary21$projected_cap_hit <- round(predict(model_tree_updated, salary21), 2)
@@ -367,7 +367,7 @@ set.seed(9)
 model_tree_updated <- cubist(x = train_pred,
                              y = train_resp,
                              committees = 77,
-                             neighbor =3)
+                             neighbor = 5)
 
 # Show predicted values for model
 salary19$projected_cap_hit <- round(predict(model_tree_updated, salary19), 2)
@@ -572,10 +572,10 @@ playerSalaryActualAndPrediction17 <-
 playerSalaryActualAndPrediction17 <- playerSalaryActualAndPrediction17[order(-playerSalaryActualAndPrediction17$projected_cap_hit),]
 
 # Write csv to use for R Shiny App
-write_csv(playerSalaryActualAndPrediction19, "UsedDataForProject/2017-18 Player Salary Projections Short Version.csv")
+write_csv(playerSalaryActualAndPrediction17, "UsedDataForProject/2017-18 Player Salary Projections Short Version.csv")
 
 # Write RDS to use for R Shiny App
-write_rds(playerSalaryActualAndPrediction19, "UsedDataForProject/2017-18 Player Salary Projections Short Version.rds")
+write_rds(playerSalaryActualAndPrediction17, "UsedDataForProject/2017-18 Player Salary Projections Short Version.rds")
 
 playerSalaryActualAndPrediction17 %>%
   ggplot(aes(x = cap_hit,
@@ -668,7 +668,7 @@ playerSalaryActualAndPrediction16 <- playerSalaryActualAndPrediction16[order(-pl
 write_csv(playerSalaryActualAndPrediction16, "UsedDataForProject/2016-17 Player Salary Projections Short Version.csv")
 
 # Write RDS to use for R Shiny App
-write_rds(playerSalaryActualAndPrediction19, "UsedDataForProject/2016-17 Player Salary Projections Short Version.rds")
+write_rds(playerSalaryActualAndPrediction16, "UsedDataForProject/2016-17 Player Salary Projections Short Version.rds")
 
 playerSalaryActualAndPrediction16 %>%
   ggplot(aes(x = cap_hit,
