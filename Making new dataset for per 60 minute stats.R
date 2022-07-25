@@ -11,14 +11,19 @@ library(purrr)
 salary21 <- read_csv("UsedDataForProject/NHL Player Stats and Salary 2021-22.csv")
 salary20 <- read_csv("UsedDataForProject/NHL Player Stats and Salary 2020-21.csv")
 salary19 <- read_csv("UsedDataForProject/NHL Player Stats and Salary 2019-20.csv")
-
+salary18 <- read_csv("UsedDataForProject/NHL Player Stats and Salary 2018-19.csv")
+salary17 <- read_csv("UsedDataForProject/NHL Player Stats and Salary 2017-18.csv")
+salary16 <- read_csv("UsedDataForProject/NHL Player Stats and Salary 2016-17.csv")
 
 # Make one dataset to use for manipulation --------------------------------
 
 # Make new data set that combines previous seasons
 salaryAllSeasons <- rbind(salary21,
                           salary20,
-                          salary19)
+                          salary19,
+                          salary18,
+                          salary17,
+                          salary16)
 
 
 # Make per 60 minute stats functions
@@ -124,7 +129,7 @@ salaryAllSeasonsPer60Minutes <- salaryAllSeasons %>%
 salaryAllSeasonsPer60Minutes[is.na(salaryAllSeasonsPer60Minutes)] = 0
 
 # Write csv file for per 60 minutes and standardized stats
-write_csv(salaryAllSeasonsPer60Minutes, "UsedDataForProject/NHL Player Stats and Salary Per 60 Minutes and Standardized 2019-22.csv")
+write_csv(salaryAllSeasonsPer60Minutes, "UsedDataForProject/NHL Player Stats and Salary Per 60 Minutes and Standardized 2016-22.csv")
 
 # Write rds file for per 60 minutes and standardized stats
-write_rds(salaryAllSeasonsPer60Minutes, "UsedDataForProject/NHL Player Stats and Salary Per 60 Minutes and Standardized 2019-22.rds")
+write_rds(salaryAllSeasonsPer60Minutes, "UsedDataForProject/NHL Player Stats and Salary Per 60 Minutes and Standardized 2016-22.rds")
