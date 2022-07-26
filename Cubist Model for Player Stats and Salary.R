@@ -7,10 +7,10 @@ library(tidyverse)
 library(Cubist)
 library(purrr)
 
-salaryAllSeasonsReadIn <- read_csv("UsedDataForProject/NHL Player Stats and Salary Per 60 Minutes and Standardized 2016-22.csv") %>%
+salaryAllSeasonsReadIn <- read_csv("UsedDataForProject/NHL Player Stats and Salary Per 60 Minutes and Standardized 2010-22.csv") %>%
   filter(games_played >= 20)
 
-salaryAllSeasons <- salaryAllSeasonsReadIn
+salaryAllSeasons <- salaryAllSeasonsReadIn 
 
 salaryAllSeasons[sapply(salaryAllSeasons, is.character)] <- lapply(salaryAllSeasons[sapply(salaryAllSeasons, is.character)], as.factor)
 
@@ -41,7 +41,7 @@ test_resp <- salaryAllSeasons$percent_cap_hit[-in_train_set]
 set.seed(9)
 model_tree <- cubist(x = train_pred,
                      y = train_resp,
-                     committees = 77)
+                     committees = 78)
 
 # Get the summary of the model
 summary(model_tree)
@@ -76,8 +76,8 @@ cubistModelResults <- as_tibble(cbind(neighbor, rmse, r_squared))
 set.seed(9)
 model_tree_updated <- cubist(x = train_pred,
                      y = train_resp,
-                     committees = 77,
-                     neighbor = 6)
+                     committees = 78,
+                     neighbor = 1)
 
 # Get the summary of the model
 summary(model_tree_updated)
@@ -90,7 +90,7 @@ salaryAllSeasons <- salaryAllSeasons %>%
 
 # Make updated data set with player, team, position, season, their actual cap hit, and the predicted cap hit
 playerSalaryActualAndPrediction <-
-  salaryAllSeasons %>%
+  salaryAllSeasons %>% 
   select(player,
          team,
          position,
@@ -101,8 +101,7 @@ playerSalaryActualAndPrediction <-
 
 playerSalaryActualAndPrediction <- playerSalaryActualAndPrediction[order(-playerSalaryActualAndPrediction$projected_cap_hit),]
 
-
-
+# Make graph to show projected vs actual cap hit
 playerSalaryActualAndPrediction %>%
   ggplot(aes(x = cap_hit,
              y = projected_cap_hit)) +
@@ -123,7 +122,6 @@ write_csv(playerSalaryActualAndPrediction, "UsedDataForProject/All Seasons Playe
 
 # Write RDS to use for R Shiny App
 write_rds(playerSalaryActualAndPrediction, "UsedDataForProject/All Seasons Player Salary Projections Short Version.rds")
-
 
 # Write csv to use for R Shiny App
 write_csv(salaryAllSeasons, "UsedDataForProject/Final Prediction Model Data.csv")
