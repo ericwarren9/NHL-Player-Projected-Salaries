@@ -25,10 +25,10 @@ salary10 <- read_csv("UsedDataForProject/NHL Player Stats and Salary 2010-11.csv
 # Do 2021-22 Data ---------------------------------------------------------
 
 # Make per 60 minute stats functions
-per60MinStatsAll <- function(x, na.rm = FALSE) (x / salary21$all_icetime * 3600) # Function for per 60 minute stats in all situations
-per60MinStats5on5 <- function(x, na.rm = FALSE) (x / salary21$x5on5_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
-per60MinStats4on5 <- function(x, na.rm = FALSE) (x / salary21$x4on5_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
-per60MinStats5on4 <- function(x, na.rm = FALSE) (x / salary21$x5on4_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStatsAll <- function(x, na.rm = FALSE) (x / salary21$games_played) # Function for per game stats in all situations
+per60MinStats5on5 <- function(x, na.rm = FALSE) (x / salary21$games_played) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStats4on5 <- function(x, na.rm = FALSE) (x / salary21$games_played) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStats5on4 <- function(x, na.rm = FALSE) (x / salary21$games_played) # Function for per 60 minute stats in 5 on 5 situations
 
 # Make per 60 minute stats
 salary21Per60Minutes <- salary21 %>%
@@ -46,7 +46,8 @@ salary21Per60Minutes <- salary21 %>%
               "diff_all_goals",
               "diff_all_shots_on_goal",
               "diff_all_high_danger_goals",
-              "diff_all_high_danger_shots"),
+              "diff_all_high_danger_shots",
+              "all_icetime"),
             per60MinStatsAll) %>%
   mutate_at(c("x5on5_assists",
               "x5on5_faceoffs_lost",
@@ -62,7 +63,8 @@ salary21Per60Minutes <- salary21 %>%
               "diff_5on5_goals",
               "diff_5on5_shots_on_goal",
               "diff_5on5_high_danger_goals",
-              "diff_5on5_high_danger_shots"),
+              "diff_5on5_high_danger_shots",
+              "x5on5_icetime"),
             per60MinStats5on5) %>%
   mutate_at(c("x5on4_assists",
               "x5on4_faceoffs_lost",
@@ -76,7 +78,8 @@ salary21Per60Minutes <- salary21 %>%
               "x5on4_i_f_takeaways",
               "x5on4_shots_blocked_by_player",
               "diff_5on4_goals",
-              "diff_5on4_shots_on_goal"),
+              "diff_5on4_shots_on_goal",
+              "x5on4_icetime"),
             per60MinStats5on4) %>%
   mutate_at(c("x4on5_assists",
               "x4on5_faceoffs_lost",
@@ -89,16 +92,17 @@ salary21Per60Minutes <- salary21 %>%
               "x4on5_i_f_shots_on_goal",
               "x4on5_i_f_takeaways",
               "x4on5_shots_blocked_by_player",
-              "diff_4on5_goals"),
+              "diff_4on5_goals",
+              "x4on5_icetime"),
             per60MinStats4on5) %>%
-  mutate(std_all_icetime = as.numeric(scale(all_icetime, center = TRUE, scale = TRUE)),
-         std_5on5_icetime = as.numeric(scale(x5on5_icetime, center = TRUE, scale = TRUE)),
-         std_5on4_icetime = as.numeric(scale(x5on4_icetime, center = TRUE, scale = TRUE)),
-         std_4on5_icetime = as.numeric(scale(x4on5_icetime, center = TRUE, scale = TRUE))) %>%
-  select(-c(all_icetime,
-            x5on5_icetime,
-            x5on4_icetime,
-            x4on5_icetime)) %>%
+  # mutate(std_all_icetime = as.numeric(scale(all_icetime, center = TRUE, scale = TRUE)),
+  #        std_5on5_icetime = as.numeric(scale(x5on5_icetime, center = TRUE, scale = TRUE)),
+  #        std_5on4_icetime = as.numeric(scale(x5on4_icetime, center = TRUE, scale = TRUE)),
+  #        std_4on5_icetime = as.numeric(scale(x4on5_icetime, center = TRUE, scale = TRUE))) %>%
+  # select(-c(all_icetime,
+  #           x5on5_icetime,
+  #           x5on4_icetime,
+  #           x4on5_icetime)) %>%
   select(player,
          position,
          team,
@@ -113,10 +117,10 @@ salary21Per60Minutes <- salary21 %>%
 # Do 2020-21 Data ---------------------------------------------------------
 
 # Make per 60 minute stats functions
-per60MinStatsAll <- function(x, na.rm = FALSE) (x / salary20$all_icetime * 3600) # Function for per 60 minute stats in all situations
-per60MinStats5on5 <- function(x, na.rm = FALSE) (x / salary20$x5on5_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
-per60MinStats4on5 <- function(x, na.rm = FALSE) (x / salary20$x4on5_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
-per60MinStats5on4 <- function(x, na.rm = FALSE) (x / salary20$x5on4_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStatsAll <- function(x, na.rm = FALSE) (x / salary20$games_played) # Function for per 60 minute stats in all situations
+per60MinStats5on5 <- function(x, na.rm = FALSE) (x / salary20$games_played) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStats4on5 <- function(x, na.rm = FALSE) (x / salary20$games_played) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStats5on4 <- function(x, na.rm = FALSE) (x / salary20$games_played) # Function for per 60 minute stats in 5 on 5 situations
 
 # Make per 60 minute stats
 salary20Per60Minutes <- salary20 %>%
@@ -134,7 +138,8 @@ salary20Per60Minutes <- salary20 %>%
               "diff_all_goals",
               "diff_all_shots_on_goal",
               "diff_all_high_danger_goals",
-              "diff_all_high_danger_shots"),
+              "diff_all_high_danger_shots",
+              "all_icetime"),
             per60MinStatsAll) %>%
   mutate_at(c("x5on5_assists",
               "x5on5_faceoffs_lost",
@@ -150,7 +155,8 @@ salary20Per60Minutes <- salary20 %>%
               "diff_5on5_goals",
               "diff_5on5_shots_on_goal",
               "diff_5on5_high_danger_goals",
-              "diff_5on5_high_danger_shots"),
+              "diff_5on5_high_danger_shots",
+              "x5on5_icetime"),
             per60MinStats5on5) %>%
   mutate_at(c("x5on4_assists",
               "x5on4_faceoffs_lost",
@@ -164,7 +170,8 @@ salary20Per60Minutes <- salary20 %>%
               "x5on4_i_f_takeaways",
               "x5on4_shots_blocked_by_player",
               "diff_5on4_goals",
-              "diff_5on4_shots_on_goal"),
+              "diff_5on4_shots_on_goal",
+              "x5on4_icetime"),
             per60MinStats5on4) %>%
   mutate_at(c("x4on5_assists",
               "x4on5_faceoffs_lost",
@@ -177,16 +184,17 @@ salary20Per60Minutes <- salary20 %>%
               "x4on5_i_f_shots_on_goal",
               "x4on5_i_f_takeaways",
               "x4on5_shots_blocked_by_player",
-              "diff_4on5_goals"),
+              "diff_4on5_goals",
+              "x4on5_icetime"),
             per60MinStats4on5) %>%
-  mutate(std_all_icetime = as.numeric(scale(all_icetime, center = TRUE, scale = TRUE)),
-         std_5on5_icetime = as.numeric(scale(x5on5_icetime, center = TRUE, scale = TRUE)),
-         std_5on4_icetime = as.numeric(scale(x5on4_icetime, center = TRUE, scale = TRUE)),
-         std_4on5_icetime = as.numeric(scale(x4on5_icetime, center = TRUE, scale = TRUE))) %>%
-  select(-c(all_icetime,
-            x5on5_icetime,
-            x5on4_icetime,
-            x4on5_icetime)) %>%
+  # mutate(std_all_icetime = as.numeric(scale(all_icetime, center = TRUE, scale = TRUE)),
+  #        std_5on5_icetime = as.numeric(scale(x5on5_icetime, center = TRUE, scale = TRUE)),
+  #        std_5on4_icetime = as.numeric(scale(x5on4_icetime, center = TRUE, scale = TRUE)),
+  #        std_4on5_icetime = as.numeric(scale(x4on5_icetime, center = TRUE, scale = TRUE))) %>%
+  # select(-c(all_icetime,
+  #           x5on5_icetime,
+  #           x5on4_icetime,
+  #           x4on5_icetime)) %>%
   select(player,
          position,
          team,
@@ -201,10 +209,10 @@ salary20Per60Minutes <- salary20 %>%
 # Do 2019-20 Data ---------------------------------------------------------
 
 # Make per 60 minute stats functions
-per60MinStatsAll <- function(x, na.rm = FALSE) (x / salary19$all_icetime * 3600) # Function for per 60 minute stats in all situations
-per60MinStats5on5 <- function(x, na.rm = FALSE) (x / salary19$x5on5_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
-per60MinStats4on5 <- function(x, na.rm = FALSE) (x / salary19$x4on5_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
-per60MinStats5on4 <- function(x, na.rm = FALSE) (x / salary19$x5on4_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStatsAll <- function(x, na.rm = FALSE) (x / salary19$games_played) # Function for per 60 minute stats in all situations
+per60MinStats5on5 <- function(x, na.rm = FALSE) (x / salary19$games_played) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStats4on5 <- function(x, na.rm = FALSE) (x / salary19$games_played) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStats5on4 <- function(x, na.rm = FALSE) (x / salary19$games_played) # Function for per 60 minute stats in 5 on 5 situations
 
 # Make per 60 minute stats
 salary19Per60Minutes <- salary19 %>%
@@ -222,7 +230,8 @@ salary19Per60Minutes <- salary19 %>%
               "diff_all_goals",
               "diff_all_shots_on_goal",
               "diff_all_high_danger_goals",
-              "diff_all_high_danger_shots"),
+              "diff_all_high_danger_shots",
+              "all_icetime"),
             per60MinStatsAll) %>%
   mutate_at(c("x5on5_assists",
               "x5on5_faceoffs_lost",
@@ -238,7 +247,8 @@ salary19Per60Minutes <- salary19 %>%
               "diff_5on5_goals",
               "diff_5on5_shots_on_goal",
               "diff_5on5_high_danger_goals",
-              "diff_5on5_high_danger_shots"),
+              "diff_5on5_high_danger_shots",
+              "x5on5_icetime"),
             per60MinStats5on5) %>%
   mutate_at(c("x5on4_assists",
               "x5on4_faceoffs_lost",
@@ -252,7 +262,8 @@ salary19Per60Minutes <- salary19 %>%
               "x5on4_i_f_takeaways",
               "x5on4_shots_blocked_by_player",
               "diff_5on4_goals",
-              "diff_5on4_shots_on_goal"),
+              "diff_5on4_shots_on_goal",
+              "x5on4_icetime"),
             per60MinStats5on4) %>%
   mutate_at(c("x4on5_assists",
               "x4on5_faceoffs_lost",
@@ -265,16 +276,17 @@ salary19Per60Minutes <- salary19 %>%
               "x4on5_i_f_shots_on_goal",
               "x4on5_i_f_takeaways",
               "x4on5_shots_blocked_by_player",
-              "diff_4on5_goals"),
+              "diff_4on5_goals",
+              "x4on5_icetime"),
             per60MinStats4on5) %>%
-  mutate(std_all_icetime = as.numeric(scale(all_icetime, center = TRUE, scale = TRUE)),
-         std_5on5_icetime = as.numeric(scale(x5on5_icetime, center = TRUE, scale = TRUE)),
-         std_5on4_icetime = as.numeric(scale(x5on4_icetime, center = TRUE, scale = TRUE)),
-         std_4on5_icetime = as.numeric(scale(x4on5_icetime, center = TRUE, scale = TRUE))) %>%
-  select(-c(all_icetime,
-            x5on5_icetime,
-            x5on4_icetime,
-            x4on5_icetime)) %>%
+  # mutate(std_all_icetime = as.numeric(scale(all_icetime, center = TRUE, scale = TRUE)),
+  #        std_5on5_icetime = as.numeric(scale(x5on5_icetime, center = TRUE, scale = TRUE)),
+  #        std_5on4_icetime = as.numeric(scale(x5on4_icetime, center = TRUE, scale = TRUE)),
+  #        std_4on5_icetime = as.numeric(scale(x4on5_icetime, center = TRUE, scale = TRUE))) %>%
+  # select(-c(all_icetime,
+  #           x5on5_icetime,
+  #           x5on4_icetime,
+  #           x4on5_icetime)) %>%
   select(player,
          position,
          team,
@@ -289,10 +301,10 @@ salary19Per60Minutes <- salary19 %>%
 # Do 2018-19 Data ---------------------------------------------------------
 
 # Make per 60 minute stats functions
-per60MinStatsAll <- function(x, na.rm = FALSE) (x / salary18$all_icetime * 3600) # Function for per 60 minute stats in all situations
-per60MinStats5on5 <- function(x, na.rm = FALSE) (x / salary18$x5on5_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
-per60MinStats4on5 <- function(x, na.rm = FALSE) (x / salary18$x4on5_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
-per60MinStats5on4 <- function(x, na.rm = FALSE) (x / salary18$x5on4_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStatsAll <- function(x, na.rm = FALSE) (x / salary18$games_played) # Function for per 60 minute stats in all situations
+per60MinStats5on5 <- function(x, na.rm = FALSE) (x / salary18$games_played) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStats4on5 <- function(x, na.rm = FALSE) (x / salary18$games_played) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStats5on4 <- function(x, na.rm = FALSE) (x / salary18$games_played) # Function for per 60 minute stats in 5 on 5 situations
 
 # Make per 60 minute stats
 salary18Per60Minutes <- salary18 %>%
@@ -310,7 +322,8 @@ salary18Per60Minutes <- salary18 %>%
               "diff_all_goals",
               "diff_all_shots_on_goal",
               "diff_all_high_danger_goals",
-              "diff_all_high_danger_shots"),
+              "diff_all_high_danger_shots",
+              "all_icetime"),
             per60MinStatsAll) %>%
   mutate_at(c("x5on5_assists",
               "x5on5_faceoffs_lost",
@@ -326,7 +339,8 @@ salary18Per60Minutes <- salary18 %>%
               "diff_5on5_goals",
               "diff_5on5_shots_on_goal",
               "diff_5on5_high_danger_goals",
-              "diff_5on5_high_danger_shots"),
+              "diff_5on5_high_danger_shots",
+              "x5on5_icetime"),
             per60MinStats5on5) %>%
   mutate_at(c("x5on4_assists",
               "x5on4_faceoffs_lost",
@@ -340,7 +354,8 @@ salary18Per60Minutes <- salary18 %>%
               "x5on4_i_f_takeaways",
               "x5on4_shots_blocked_by_player",
               "diff_5on4_goals",
-              "diff_5on4_shots_on_goal"),
+              "diff_5on4_shots_on_goal",
+              "x5on4_icetime"),
             per60MinStats5on4) %>%
   mutate_at(c("x4on5_assists",
               "x4on5_faceoffs_lost",
@@ -353,16 +368,17 @@ salary18Per60Minutes <- salary18 %>%
               "x4on5_i_f_shots_on_goal",
               "x4on5_i_f_takeaways",
               "x4on5_shots_blocked_by_player",
-              "diff_4on5_goals"),
+              "diff_4on5_goals",
+              "x4on5_icetime"),
             per60MinStats4on5) %>%
-  mutate(std_all_icetime = as.numeric(scale(all_icetime, center = TRUE, scale = TRUE)),
-         std_5on5_icetime = as.numeric(scale(x5on5_icetime, center = TRUE, scale = TRUE)),
-         std_5on4_icetime = as.numeric(scale(x5on4_icetime, center = TRUE, scale = TRUE)),
-         std_4on5_icetime = as.numeric(scale(x4on5_icetime, center = TRUE, scale = TRUE))) %>%
-  select(-c(all_icetime,
-            x5on5_icetime,
-            x5on4_icetime,
-            x4on5_icetime)) %>%
+  # mutate(std_all_icetime = as.numeric(scale(all_icetime, center = TRUE, scale = TRUE)),
+  #        std_5on5_icetime = as.numeric(scale(x5on5_icetime, center = TRUE, scale = TRUE)),
+  #        std_5on4_icetime = as.numeric(scale(x5on4_icetime, center = TRUE, scale = TRUE)),
+  #        std_4on5_icetime = as.numeric(scale(x4on5_icetime, center = TRUE, scale = TRUE))) %>%
+  # select(-c(all_icetime,
+  #           x5on5_icetime,
+  #           x5on4_icetime,
+  #           x4on5_icetime)) %>%
   select(player,
          position,
          team,
@@ -377,10 +393,10 @@ salary18Per60Minutes <- salary18 %>%
 # Do 2017-18 Data ---------------------------------------------------------
 
 # Make per 60 minute stats functions
-per60MinStatsAll <- function(x, na.rm = FALSE) (x / salary17$all_icetime * 3600) # Function for per 60 minute stats in all situations
-per60MinStats5on5 <- function(x, na.rm = FALSE) (x / salary17$x5on5_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
-per60MinStats4on5 <- function(x, na.rm = FALSE) (x / salary17$x4on5_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
-per60MinStats5on4 <- function(x, na.rm = FALSE) (x / salary17$x5on4_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStatsAll <- function(x, na.rm = FALSE) (x / salary17$games_played) # Function for per 60 minute stats in all situations
+per60MinStats5on5 <- function(x, na.rm = FALSE) (x / salary17$games_played) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStats4on5 <- function(x, na.rm = FALSE) (x / salary17$games_played) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStats5on4 <- function(x, na.rm = FALSE) (x / salary17$games_played) # Function for per 60 minute stats in 5 on 5 situations
 
 # Make per 60 minute stats
 salary17Per60Minutes <- salary17 %>%
@@ -398,7 +414,8 @@ salary17Per60Minutes <- salary17 %>%
               "diff_all_goals",
               "diff_all_shots_on_goal",
               "diff_all_high_danger_goals",
-              "diff_all_high_danger_shots"),
+              "diff_all_high_danger_shots",
+              "all_icetime"),
             per60MinStatsAll) %>%
   mutate_at(c("x5on5_assists",
               "x5on5_faceoffs_lost",
@@ -414,7 +431,8 @@ salary17Per60Minutes <- salary17 %>%
               "diff_5on5_goals",
               "diff_5on5_shots_on_goal",
               "diff_5on5_high_danger_goals",
-              "diff_5on5_high_danger_shots"),
+              "diff_5on5_high_danger_shots",
+              "x5on5_icetime"),
             per60MinStats5on5) %>%
   mutate_at(c("x5on4_assists",
               "x5on4_faceoffs_lost",
@@ -428,7 +446,8 @@ salary17Per60Minutes <- salary17 %>%
               "x5on4_i_f_takeaways",
               "x5on4_shots_blocked_by_player",
               "diff_5on4_goals",
-              "diff_5on4_shots_on_goal"),
+              "diff_5on4_shots_on_goal",
+              "x5on4_icetime"),
             per60MinStats5on4) %>%
   mutate_at(c("x4on5_assists",
               "x4on5_faceoffs_lost",
@@ -441,16 +460,17 @@ salary17Per60Minutes <- salary17 %>%
               "x4on5_i_f_shots_on_goal",
               "x4on5_i_f_takeaways",
               "x4on5_shots_blocked_by_player",
-              "diff_4on5_goals"),
+              "diff_4on5_goals",
+              "x4on5_icetime"),
             per60MinStats4on5) %>%
-  mutate(std_all_icetime = as.numeric(scale(all_icetime, center = TRUE, scale = TRUE)),
-         std_5on5_icetime = as.numeric(scale(x5on5_icetime, center = TRUE, scale = TRUE)),
-         std_5on4_icetime = as.numeric(scale(x5on4_icetime, center = TRUE, scale = TRUE)),
-         std_4on5_icetime = as.numeric(scale(x4on5_icetime, center = TRUE, scale = TRUE))) %>%
-  select(-c(all_icetime,
-            x5on5_icetime,
-            x5on4_icetime,
-            x4on5_icetime)) %>%
+  # mutate(std_all_icetime = as.numeric(scale(all_icetime, center = TRUE, scale = TRUE)),
+  #        std_5on5_icetime = as.numeric(scale(x5on5_icetime, center = TRUE, scale = TRUE)),
+  #        std_5on4_icetime = as.numeric(scale(x5on4_icetime, center = TRUE, scale = TRUE)),
+  #        std_4on5_icetime = as.numeric(scale(x4on5_icetime, center = TRUE, scale = TRUE))) %>%
+  # select(-c(all_icetime,
+  #           x5on5_icetime,
+  #           x5on4_icetime,
+  #           x4on5_icetime)) %>%
   select(player,
          position,
          team,
@@ -465,10 +485,10 @@ salary17Per60Minutes <- salary17 %>%
 # Do 2016-17 Data ---------------------------------------------------------
 
 # Make per 60 minute stats functions
-per60MinStatsAll <- function(x, na.rm = FALSE) (x / salary16$all_icetime * 3600) # Function for per 60 minute stats in all situations
-per60MinStats5on5 <- function(x, na.rm = FALSE) (x / salary16$x5on5_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
-per60MinStats4on5 <- function(x, na.rm = FALSE) (x / salary16$x4on5_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
-per60MinStats5on4 <- function(x, na.rm = FALSE) (x / salary16$x5on4_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStatsAll <- function(x, na.rm = FALSE) (x / salary16$games_played) # Function for per 60 minute stats in all situations
+per60MinStats5on5 <- function(x, na.rm = FALSE) (x / salary16$games_played) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStats4on5 <- function(x, na.rm = FALSE) (x / salary16$games_played) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStats5on4 <- function(x, na.rm = FALSE) (x / salary16$games_played) # Function for per 60 minute stats in 5 on 5 situations
 
 # Make per 60 minute stats
 salary16Per60Minutes <- salary16 %>%
@@ -486,7 +506,8 @@ salary16Per60Minutes <- salary16 %>%
               "diff_all_goals",
               "diff_all_shots_on_goal",
               "diff_all_high_danger_goals",
-              "diff_all_high_danger_shots"),
+              "diff_all_high_danger_shots",
+              "all_icetime"),
             per60MinStatsAll) %>%
   mutate_at(c("x5on5_assists",
               "x5on5_faceoffs_lost",
@@ -502,7 +523,8 @@ salary16Per60Minutes <- salary16 %>%
               "diff_5on5_goals",
               "diff_5on5_shots_on_goal",
               "diff_5on5_high_danger_goals",
-              "diff_5on5_high_danger_shots"),
+              "diff_5on5_high_danger_shots",
+              "x5on5_icetime"),
             per60MinStats5on5) %>%
   mutate_at(c("x5on4_assists",
               "x5on4_faceoffs_lost",
@@ -516,7 +538,8 @@ salary16Per60Minutes <- salary16 %>%
               "x5on4_i_f_takeaways",
               "x5on4_shots_blocked_by_player",
               "diff_5on4_goals",
-              "diff_5on4_shots_on_goal"),
+              "diff_5on4_shots_on_goal",
+              "x5on4_icetime"),
             per60MinStats5on4) %>%
   mutate_at(c("x4on5_assists",
               "x4on5_faceoffs_lost",
@@ -529,16 +552,17 @@ salary16Per60Minutes <- salary16 %>%
               "x4on5_i_f_shots_on_goal",
               "x4on5_i_f_takeaways",
               "x4on5_shots_blocked_by_player",
-              "diff_4on5_goals"),
+              "diff_4on5_goals",
+              "x4on5_icetime"),
             per60MinStats4on5) %>%
-  mutate(std_all_icetime = as.numeric(scale(all_icetime, center = TRUE, scale = TRUE)),
-         std_5on5_icetime = as.numeric(scale(x5on5_icetime, center = TRUE, scale = TRUE)),
-         std_5on4_icetime = as.numeric(scale(x5on4_icetime, center = TRUE, scale = TRUE)),
-         std_4on5_icetime = as.numeric(scale(x4on5_icetime, center = TRUE, scale = TRUE))) %>%
-  select(-c(all_icetime,
-            x5on5_icetime,
-            x5on4_icetime,
-            x4on5_icetime)) %>%
+  # mutate(std_all_icetime = as.numeric(scale(all_icetime, center = TRUE, scale = TRUE)),
+  #        std_5on5_icetime = as.numeric(scale(x5on5_icetime, center = TRUE, scale = TRUE)),
+  #        std_5on4_icetime = as.numeric(scale(x5on4_icetime, center = TRUE, scale = TRUE)),
+  #        std_4on5_icetime = as.numeric(scale(x4on5_icetime, center = TRUE, scale = TRUE))) %>%
+  # select(-c(all_icetime,
+  #           x5on5_icetime,
+  #           x5on4_icetime,
+  #           x4on5_icetime)) %>%
   select(player,
          position,
          team,
@@ -553,10 +577,10 @@ salary16Per60Minutes <- salary16 %>%
 # Do 2015-16 Data ---------------------------------------------------------
 
 # Make per 60 minute stats functions
-per60MinStatsAll <- function(x, na.rm = FALSE) (x / salary15$all_icetime * 3600) # Function for per 60 minute stats in all situations
-per60MinStats5on5 <- function(x, na.rm = FALSE) (x / salary15$x5on5_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
-per60MinStats4on5 <- function(x, na.rm = FALSE) (x / salary15$x4on5_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
-per60MinStats5on4 <- function(x, na.rm = FALSE) (x / salary15$x5on4_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStatsAll <- function(x, na.rm = FALSE) (x / salary15$games_played) # Function for per 60 minute stats in all situations
+per60MinStats5on5 <- function(x, na.rm = FALSE) (x / salary15$games_played) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStats4on5 <- function(x, na.rm = FALSE) (x / salary15$games_played) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStats5on4 <- function(x, na.rm = FALSE) (x / salary15$games_played) # Function for per 60 minute stats in 5 on 5 situations
 
 # Make per 60 minute stats
 salary15Per60Minutes <- salary15 %>%
@@ -574,7 +598,8 @@ salary15Per60Minutes <- salary15 %>%
               "diff_all_goals",
               "diff_all_shots_on_goal",
               "diff_all_high_danger_goals",
-              "diff_all_high_danger_shots"),
+              "diff_all_high_danger_shots",
+              "all_icetime"),
             per60MinStatsAll) %>%
   mutate_at(c("x5on5_assists",
               "x5on5_faceoffs_lost",
@@ -590,7 +615,8 @@ salary15Per60Minutes <- salary15 %>%
               "diff_5on5_goals",
               "diff_5on5_shots_on_goal",
               "diff_5on5_high_danger_goals",
-              "diff_5on5_high_danger_shots"),
+              "diff_5on5_high_danger_shots",
+              "x5on5_icetime"),
             per60MinStats5on5) %>%
   mutate_at(c("x5on4_assists",
               "x5on4_faceoffs_lost",
@@ -604,7 +630,8 @@ salary15Per60Minutes <- salary15 %>%
               "x5on4_i_f_takeaways",
               "x5on4_shots_blocked_by_player",
               "diff_5on4_goals",
-              "diff_5on4_shots_on_goal"),
+              "diff_5on4_shots_on_goal",
+              "x5on4_icetime"),
             per60MinStats5on4) %>%
   mutate_at(c("x4on5_assists",
               "x4on5_faceoffs_lost",
@@ -617,16 +644,17 @@ salary15Per60Minutes <- salary15 %>%
               "x4on5_i_f_shots_on_goal",
               "x4on5_i_f_takeaways",
               "x4on5_shots_blocked_by_player",
-              "diff_4on5_goals"),
+              "diff_4on5_goals",
+              "x4on5_icetime"),
             per60MinStats4on5) %>%
-  mutate(std_all_icetime = as.numeric(scale(all_icetime, center = TRUE, scale = TRUE)),
-         std_5on5_icetime = as.numeric(scale(x5on5_icetime, center = TRUE, scale = TRUE)),
-         std_5on4_icetime = as.numeric(scale(x5on4_icetime, center = TRUE, scale = TRUE)),
-         std_4on5_icetime = as.numeric(scale(x4on5_icetime, center = TRUE, scale = TRUE))) %>%
-  select(-c(all_icetime,
-            x5on5_icetime,
-            x5on4_icetime,
-            x4on5_icetime)) %>%
+  # mutate(std_all_icetime = as.numeric(scale(all_icetime, center = TRUE, scale = TRUE)),
+  #        std_5on5_icetime = as.numeric(scale(x5on5_icetime, center = TRUE, scale = TRUE)),
+  #        std_5on4_icetime = as.numeric(scale(x5on4_icetime, center = TRUE, scale = TRUE)),
+  #        std_4on5_icetime = as.numeric(scale(x4on5_icetime, center = TRUE, scale = TRUE))) %>%
+  # select(-c(all_icetime,
+  #           x5on5_icetime,
+  #           x5on4_icetime,
+  #           x4on5_icetime)) %>%
   select(player,
          position,
          team,
@@ -641,10 +669,10 @@ salary15Per60Minutes <- salary15 %>%
 # Do 2014-15 Data ---------------------------------------------------------
 
 # Make per 60 minute stats functions
-per60MinStatsAll <- function(x, na.rm = FALSE) (x / salary14$all_icetime * 3600) # Function for per 60 minute stats in all situations
-per60MinStats5on5 <- function(x, na.rm = FALSE) (x / salary14$x5on5_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
-per60MinStats4on5 <- function(x, na.rm = FALSE) (x / salary14$x4on5_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
-per60MinStats5on4 <- function(x, na.rm = FALSE) (x / salary14$x5on4_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStatsAll <- function(x, na.rm = FALSE) (x / salary14$games_played) # Function for per 60 minute stats in all situations
+per60MinStats5on5 <- function(x, na.rm = FALSE) (x / salary14$games_played) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStats4on5 <- function(x, na.rm = FALSE) (x / salary14$games_played) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStats5on4 <- function(x, na.rm = FALSE) (x / salary14$games_played) # Function for per 60 minute stats in 5 on 5 situations
 
 # Make per 60 minute stats
 salary14Per60Minutes <- salary14 %>%
@@ -662,7 +690,8 @@ salary14Per60Minutes <- salary14 %>%
               "diff_all_goals",
               "diff_all_shots_on_goal",
               "diff_all_high_danger_goals",
-              "diff_all_high_danger_shots"),
+              "diff_all_high_danger_shots",
+              "all_icetime"),
             per60MinStatsAll) %>%
   mutate_at(c("x5on5_assists",
               "x5on5_faceoffs_lost",
@@ -678,7 +707,8 @@ salary14Per60Minutes <- salary14 %>%
               "diff_5on5_goals",
               "diff_5on5_shots_on_goal",
               "diff_5on5_high_danger_goals",
-              "diff_5on5_high_danger_shots"),
+              "diff_5on5_high_danger_shots",
+              "x5on5_icetime"),
             per60MinStats5on5) %>%
   mutate_at(c("x5on4_assists",
               "x5on4_faceoffs_lost",
@@ -692,7 +722,8 @@ salary14Per60Minutes <- salary14 %>%
               "x5on4_i_f_takeaways",
               "x5on4_shots_blocked_by_player",
               "diff_5on4_goals",
-              "diff_5on4_shots_on_goal"),
+              "diff_5on4_shots_on_goal",
+              "x5on4_icetime"),
             per60MinStats5on4) %>%
   mutate_at(c("x4on5_assists",
               "x4on5_faceoffs_lost",
@@ -705,16 +736,17 @@ salary14Per60Minutes <- salary14 %>%
               "x4on5_i_f_shots_on_goal",
               "x4on5_i_f_takeaways",
               "x4on5_shots_blocked_by_player",
-              "diff_4on5_goals"),
+              "diff_4on5_goals",
+              "x4on5_icetime"),
             per60MinStats4on5) %>%
-  mutate(std_all_icetime = as.numeric(scale(all_icetime, center = TRUE, scale = TRUE)),
-         std_5on5_icetime = as.numeric(scale(x5on5_icetime, center = TRUE, scale = TRUE)),
-         std_5on4_icetime = as.numeric(scale(x5on4_icetime, center = TRUE, scale = TRUE)),
-         std_4on5_icetime = as.numeric(scale(x4on5_icetime, center = TRUE, scale = TRUE))) %>%
-  select(-c(all_icetime,
-            x5on5_icetime,
-            x5on4_icetime,
-            x4on5_icetime)) %>%
+  # mutate(std_all_icetime = as.numeric(scale(all_icetime, center = TRUE, scale = TRUE)),
+  #        std_5on5_icetime = as.numeric(scale(x5on5_icetime, center = TRUE, scale = TRUE)),
+  #        std_5on4_icetime = as.numeric(scale(x5on4_icetime, center = TRUE, scale = TRUE)),
+  #        std_4on5_icetime = as.numeric(scale(x4on5_icetime, center = TRUE, scale = TRUE))) %>%
+  # select(-c(all_icetime,
+  #           x5on5_icetime,
+  #           x5on4_icetime,
+  #           x4on5_icetime)) %>%
   select(player,
          position,
          team,
@@ -729,10 +761,10 @@ salary14Per60Minutes <- salary14 %>%
 # Do 2013-14 Data ---------------------------------------------------------
 
 # Make per 60 minute stats functions
-per60MinStatsAll <- function(x, na.rm = FALSE) (x / salary13$all_icetime * 3600) # Function for per 60 minute stats in all situations
-per60MinStats5on5 <- function(x, na.rm = FALSE) (x / salary13$x5on5_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
-per60MinStats4on5 <- function(x, na.rm = FALSE) (x / salary13$x4on5_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
-per60MinStats5on4 <- function(x, na.rm = FALSE) (x / salary13$x5on4_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStatsAll <- function(x, na.rm = FALSE) (x / salary13$games_played) # Function for per 60 minute stats in all situations
+per60MinStats5on5 <- function(x, na.rm = FALSE) (x / salary13$games_played) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStats4on5 <- function(x, na.rm = FALSE) (x / salary13$games_played) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStats5on4 <- function(x, na.rm = FALSE) (x / salary13$games_played) # Function for per 60 minute stats in 5 on 5 situations
 
 # Make per 60 minute stats
 salary13Per60Minutes <- salary13 %>%
@@ -750,7 +782,8 @@ salary13Per60Minutes <- salary13 %>%
               "diff_all_goals",
               "diff_all_shots_on_goal",
               "diff_all_high_danger_goals",
-              "diff_all_high_danger_shots"),
+              "diff_all_high_danger_shots",
+              "all_icetime"),
             per60MinStatsAll) %>%
   mutate_at(c("x5on5_assists",
               "x5on5_faceoffs_lost",
@@ -766,7 +799,8 @@ salary13Per60Minutes <- salary13 %>%
               "diff_5on5_goals",
               "diff_5on5_shots_on_goal",
               "diff_5on5_high_danger_goals",
-              "diff_5on5_high_danger_shots"),
+              "diff_5on5_high_danger_shots",
+              "x5on5_icetime"),
             per60MinStats5on5) %>%
   mutate_at(c("x5on4_assists",
               "x5on4_faceoffs_lost",
@@ -780,7 +814,8 @@ salary13Per60Minutes <- salary13 %>%
               "x5on4_i_f_takeaways",
               "x5on4_shots_blocked_by_player",
               "diff_5on4_goals",
-              "diff_5on4_shots_on_goal"),
+              "diff_5on4_shots_on_goal",
+              "x5on4_icetime"),
             per60MinStats5on4) %>%
   mutate_at(c("x4on5_assists",
               "x4on5_faceoffs_lost",
@@ -793,16 +828,17 @@ salary13Per60Minutes <- salary13 %>%
               "x4on5_i_f_shots_on_goal",
               "x4on5_i_f_takeaways",
               "x4on5_shots_blocked_by_player",
-              "diff_4on5_goals"),
+              "diff_4on5_goals",
+              "x4on5_icetime"),
             per60MinStats4on5) %>%
-  mutate(std_all_icetime = as.numeric(scale(all_icetime, center = TRUE, scale = TRUE)),
-         std_5on5_icetime = as.numeric(scale(x5on5_icetime, center = TRUE, scale = TRUE)),
-         std_5on4_icetime = as.numeric(scale(x5on4_icetime, center = TRUE, scale = TRUE)),
-         std_4on5_icetime = as.numeric(scale(x4on5_icetime, center = TRUE, scale = TRUE))) %>%
-  select(-c(all_icetime,
-            x5on5_icetime,
-            x5on4_icetime,
-            x4on5_icetime)) %>%
+  # mutate(std_all_icetime = as.numeric(scale(all_icetime, center = TRUE, scale = TRUE)),
+  #        std_5on5_icetime = as.numeric(scale(x5on5_icetime, center = TRUE, scale = TRUE)),
+  #        std_5on4_icetime = as.numeric(scale(x5on4_icetime, center = TRUE, scale = TRUE)),
+  #        std_4on5_icetime = as.numeric(scale(x4on5_icetime, center = TRUE, scale = TRUE))) %>%
+  # select(-c(all_icetime,
+  #           x5on5_icetime,
+  #           x5on4_icetime,
+  #           x4on5_icetime)) %>%
   select(player,
          position,
          team,
@@ -817,10 +853,10 @@ salary13Per60Minutes <- salary13 %>%
 # Do 2012-13 Data ---------------------------------------------------------
 
 # Make per 60 minute stats functions
-per60MinStatsAll <- function(x, na.rm = FALSE) (x / salary12$all_icetime * 3600) # Function for per 60 minute stats in all situations
-per60MinStats5on5 <- function(x, na.rm = FALSE) (x / salary12$x5on5_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
-per60MinStats4on5 <- function(x, na.rm = FALSE) (x / salary12$x4on5_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
-per60MinStats5on4 <- function(x, na.rm = FALSE) (x / salary12$x5on4_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStatsAll <- function(x, na.rm = FALSE) (x / salary12$games_played) # Function for per 60 minute stats in all situations
+per60MinStats5on5 <- function(x, na.rm = FALSE) (x / salary12$games_played) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStats4on5 <- function(x, na.rm = FALSE) (x / salary12$games_played) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStats5on4 <- function(x, na.rm = FALSE) (x / salary12$games_played) # Function for per 60 minute stats in 5 on 5 situations
 
 # Make per 60 minute stats
 salary12Per60Minutes <- salary12 %>%
@@ -838,7 +874,8 @@ salary12Per60Minutes <- salary12 %>%
               "diff_all_goals",
               "diff_all_shots_on_goal",
               "diff_all_high_danger_goals",
-              "diff_all_high_danger_shots"),
+              "diff_all_high_danger_shots",
+              "all_icetime"),
             per60MinStatsAll) %>%
   mutate_at(c("x5on5_assists",
               "x5on5_faceoffs_lost",
@@ -854,7 +891,8 @@ salary12Per60Minutes <- salary12 %>%
               "diff_5on5_goals",
               "diff_5on5_shots_on_goal",
               "diff_5on5_high_danger_goals",
-              "diff_5on5_high_danger_shots"),
+              "diff_5on5_high_danger_shots",
+              "x5on5_icetime"),
             per60MinStats5on5) %>%
   mutate_at(c("x5on4_assists",
               "x5on4_faceoffs_lost",
@@ -868,7 +906,8 @@ salary12Per60Minutes <- salary12 %>%
               "x5on4_i_f_takeaways",
               "x5on4_shots_blocked_by_player",
               "diff_5on4_goals",
-              "diff_5on4_shots_on_goal"),
+              "diff_5on4_shots_on_goal",
+              "x5on4_icetime"),
             per60MinStats5on4) %>%
   mutate_at(c("x4on5_assists",
               "x4on5_faceoffs_lost",
@@ -881,16 +920,17 @@ salary12Per60Minutes <- salary12 %>%
               "x4on5_i_f_shots_on_goal",
               "x4on5_i_f_takeaways",
               "x4on5_shots_blocked_by_player",
-              "diff_4on5_goals"),
+              "diff_4on5_goals",
+              "x4on5_icetime"),
             per60MinStats4on5) %>%
-  mutate(std_all_icetime = as.numeric(scale(all_icetime, center = TRUE, scale = TRUE)),
-         std_5on5_icetime = as.numeric(scale(x5on5_icetime, center = TRUE, scale = TRUE)),
-         std_5on4_icetime = as.numeric(scale(x5on4_icetime, center = TRUE, scale = TRUE)),
-         std_4on5_icetime = as.numeric(scale(x4on5_icetime, center = TRUE, scale = TRUE))) %>%
-  select(-c(all_icetime,
-            x5on5_icetime,
-            x5on4_icetime,
-            x4on5_icetime)) %>%
+  # mutate(std_all_icetime = as.numeric(scale(all_icetime, center = TRUE, scale = TRUE)),
+  #        std_5on5_icetime = as.numeric(scale(x5on5_icetime, center = TRUE, scale = TRUE)),
+  #        std_5on4_icetime = as.numeric(scale(x5on4_icetime, center = TRUE, scale = TRUE)),
+  #        std_4on5_icetime = as.numeric(scale(x4on5_icetime, center = TRUE, scale = TRUE))) %>%
+  # select(-c(all_icetime,
+  #           x5on5_icetime,
+  #           x5on4_icetime,
+  #           x4on5_icetime)) %>%
   select(player,
          position,
          team,
@@ -905,10 +945,10 @@ salary12Per60Minutes <- salary12 %>%
 # Do 2011-12 Data ---------------------------------------------------------
 
 # Make per 60 minute stats functions
-per60MinStatsAll <- function(x, na.rm = FALSE) (x / salary11$all_icetime * 3600) # Function for per 60 minute stats in all situations
-per60MinStats5on5 <- function(x, na.rm = FALSE) (x / salary11$x5on5_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
-per60MinStats4on5 <- function(x, na.rm = FALSE) (x / salary11$x4on5_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
-per60MinStats5on4 <- function(x, na.rm = FALSE) (x / salary11$x5on4_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStatsAll <- function(x, na.rm = FALSE) (x / salary11$games_played) # Function for per 60 minute stats in all situations
+per60MinStats5on5 <- function(x, na.rm = FALSE) (x / salary11$games_played) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStats4on5 <- function(x, na.rm = FALSE) (x / salary11$games_played) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStats5on4 <- function(x, na.rm = FALSE) (x / salary11$games_played) # Function for per 60 minute stats in 5 on 5 situations
 
 # Make per 60 minute stats
 salary11Per60Minutes <- salary11 %>%
@@ -926,7 +966,8 @@ salary11Per60Minutes <- salary11 %>%
               "diff_all_goals",
               "diff_all_shots_on_goal",
               "diff_all_high_danger_goals",
-              "diff_all_high_danger_shots"),
+              "diff_all_high_danger_shots",
+              "all_icetime"),
             per60MinStatsAll) %>%
   mutate_at(c("x5on5_assists",
               "x5on5_faceoffs_lost",
@@ -942,7 +983,8 @@ salary11Per60Minutes <- salary11 %>%
               "diff_5on5_goals",
               "diff_5on5_shots_on_goal",
               "diff_5on5_high_danger_goals",
-              "diff_5on5_high_danger_shots"),
+              "diff_5on5_high_danger_shots",
+              "x5on5_icetime"),
             per60MinStats5on5) %>%
   mutate_at(c("x5on4_assists",
               "x5on4_faceoffs_lost",
@@ -956,7 +998,8 @@ salary11Per60Minutes <- salary11 %>%
               "x5on4_i_f_takeaways",
               "x5on4_shots_blocked_by_player",
               "diff_5on4_goals",
-              "diff_5on4_shots_on_goal"),
+              "diff_5on4_shots_on_goal",
+              "x5on4_icetime"),
             per60MinStats5on4) %>%
   mutate_at(c("x4on5_assists",
               "x4on5_faceoffs_lost",
@@ -969,16 +1012,17 @@ salary11Per60Minutes <- salary11 %>%
               "x4on5_i_f_shots_on_goal",
               "x4on5_i_f_takeaways",
               "x4on5_shots_blocked_by_player",
-              "diff_4on5_goals"),
+              "diff_4on5_goals",
+              "x4on5_icetime"),
             per60MinStats4on5) %>%
-  mutate(std_all_icetime = as.numeric(scale(all_icetime, center = TRUE, scale = TRUE)),
-         std_5on5_icetime = as.numeric(scale(x5on5_icetime, center = TRUE, scale = TRUE)),
-         std_5on4_icetime = as.numeric(scale(x5on4_icetime, center = TRUE, scale = TRUE)),
-         std_4on5_icetime = as.numeric(scale(x4on5_icetime, center = TRUE, scale = TRUE))) %>%
-  select(-c(all_icetime,
-            x5on5_icetime,
-            x5on4_icetime,
-            x4on5_icetime)) %>%
+  # mutate(std_all_icetime = as.numeric(scale(all_icetime, center = TRUE, scale = TRUE)),
+  #        std_5on5_icetime = as.numeric(scale(x5on5_icetime, center = TRUE, scale = TRUE)),
+  #        std_5on4_icetime = as.numeric(scale(x5on4_icetime, center = TRUE, scale = TRUE)),
+  #        std_4on5_icetime = as.numeric(scale(x4on5_icetime, center = TRUE, scale = TRUE))) %>%
+  # select(-c(all_icetime,
+  #           x5on5_icetime,
+  #           x5on4_icetime,
+  #           x4on5_icetime)) %>%
   select(player,
          position,
          team,
@@ -993,10 +1037,10 @@ salary11Per60Minutes <- salary11 %>%
 # Do 2010-11 Data ---------------------------------------------------------
 
 # Make per 60 minute stats functions
-per60MinStatsAll <- function(x, na.rm = FALSE) (x / salary10$all_icetime * 3600) # Function for per 60 minute stats in all situations
-per60MinStats5on5 <- function(x, na.rm = FALSE) (x / salary10$x5on5_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
-per60MinStats4on5 <- function(x, na.rm = FALSE) (x / salary10$x4on5_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
-per60MinStats5on4 <- function(x, na.rm = FALSE) (x / salary10$x5on4_icetime * 3600) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStatsAll <- function(x, na.rm = FALSE) (x / salary10$games_played) # Function for per 60 minute stats in all situations
+per60MinStats5on5 <- function(x, na.rm = FALSE) (x / salary10$games_played) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStats4on5 <- function(x, na.rm = FALSE) (x / salary10$games_played) # Function for per 60 minute stats in 5 on 5 situations
+per60MinStats5on4 <- function(x, na.rm = FALSE) (x / salary10$games_played) # Function for per 60 minute stats in 5 on 5 situations
 
 # Make per 60 minute stats
 salary10Per60Minutes <- salary10 %>%
@@ -1014,7 +1058,8 @@ salary10Per60Minutes <- salary10 %>%
               "diff_all_goals",
               "diff_all_shots_on_goal",
               "diff_all_high_danger_goals",
-              "diff_all_high_danger_shots"),
+              "diff_all_high_danger_shots",
+              "all_icetime"),
             per60MinStatsAll) %>%
   mutate_at(c("x5on5_assists",
               "x5on5_faceoffs_lost",
@@ -1030,7 +1075,8 @@ salary10Per60Minutes <- salary10 %>%
               "diff_5on5_goals",
               "diff_5on5_shots_on_goal",
               "diff_5on5_high_danger_goals",
-              "diff_5on5_high_danger_shots"),
+              "diff_5on5_high_danger_shots",
+              "x5on5_icetime"),
             per60MinStats5on5) %>%
   mutate_at(c("x5on4_assists",
               "x5on4_faceoffs_lost",
@@ -1044,7 +1090,8 @@ salary10Per60Minutes <- salary10 %>%
               "x5on4_i_f_takeaways",
               "x5on4_shots_blocked_by_player",
               "diff_5on4_goals",
-              "diff_5on4_shots_on_goal"),
+              "diff_5on4_shots_on_goal",
+              "x5on4_icetime"),
             per60MinStats5on4) %>%
   mutate_at(c("x4on5_assists",
               "x4on5_faceoffs_lost",
@@ -1057,16 +1104,17 @@ salary10Per60Minutes <- salary10 %>%
               "x4on5_i_f_shots_on_goal",
               "x4on5_i_f_takeaways",
               "x4on5_shots_blocked_by_player",
-              "diff_4on5_goals"),
+              "diff_4on5_goals",
+              "x4on5_icetime"),
             per60MinStats4on5) %>%
-  mutate(std_all_icetime = as.numeric(scale(all_icetime, center = TRUE, scale = TRUE)),
-         std_5on5_icetime = as.numeric(scale(x5on5_icetime, center = TRUE, scale = TRUE)),
-         std_5on4_icetime = as.numeric(scale(x5on4_icetime, center = TRUE, scale = TRUE)),
-         std_4on5_icetime = as.numeric(scale(x4on5_icetime, center = TRUE, scale = TRUE))) %>%
-  select(-c(all_icetime,
-            x5on5_icetime,
-            x5on4_icetime,
-            x4on5_icetime)) %>%
+  # mutate(std_all_icetime = as.numeric(scale(all_icetime, center = TRUE, scale = TRUE)),
+  #        std_5on5_icetime = as.numeric(scale(x5on5_icetime, center = TRUE, scale = TRUE)),
+  #        std_5on4_icetime = as.numeric(scale(x5on4_icetime, center = TRUE, scale = TRUE)),
+  #        std_4on5_icetime = as.numeric(scale(x4on5_icetime, center = TRUE, scale = TRUE))) %>%
+  # select(-c(all_icetime,
+  #           x5on5_icetime,
+  #           x5on4_icetime,
+  #           x4on5_icetime)) %>%
   select(player,
          position,
          team,
