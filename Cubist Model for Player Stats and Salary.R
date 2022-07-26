@@ -77,7 +77,7 @@ set.seed(9)
 model_tree_updated <- cubist(x = train_pred,
                      y = train_resp,
                      committees = 78,
-                     neighbor = 1)
+                     neighbor = 3)
 
 # Get the summary of the model
 summary(model_tree_updated)
@@ -97,7 +97,8 @@ playerSalaryActualAndPrediction <-
          season,
          games_played,
          cap_hit,
-         projected_cap_hit)
+         projected_cap_hit,
+         projected_percent_cap_hit)
 
 playerSalaryActualAndPrediction <- playerSalaryActualAndPrediction[order(-playerSalaryActualAndPrediction$projected_cap_hit),]
 
