@@ -345,7 +345,8 @@ library(janitor)
 finalData_salary19 <- clean_names(finalData_salary19) %>%
   rename(plusMinus = x) %>%
   mutate(total_cap = 81500000,
-         percent_cap_hit = round(cap_hit / total_cap, 6))
+         percent_cap_hit = round(cap_hit / total_cap, 6),
+         covid = "covid")
 
 
 # Write csv and rds files to be used for later projects ---------------------------------
