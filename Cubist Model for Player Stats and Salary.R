@@ -8,7 +8,9 @@ library(Cubist)
 library(purrr)
 
 salaryAllSeasonsReadIn <- read_csv("UsedDataForProject/NHL Player Stats and Salary Per 60 Minutes and Standardized 2010-22.csv") %>%
-  filter(games_played >= 20)
+  filter(games_played >= 20,
+         cap_hit > 99999,
+         age != 0)
 
 salaryAllSeasons <- salaryAllSeasonsReadIn 
 
@@ -77,7 +79,7 @@ set.seed(9)
 model_tree_updated <- cubist(x = train_pred,
                      y = train_resp,
                      committees = 78,
-                     neighbor = 3)
+                     neighbor = 2)
 
 # Get the summary of the model
 summary(model_tree_updated)
@@ -96,6 +98,7 @@ playerSalaryActualAndPrediction <-
          position,
          season,
          games_played,
+         age,
          cap_hit,
          projected_cap_hit,
          projected_percent_cap_hit)
@@ -104,8 +107,8 @@ playerSalaryActualAndPrediction <- playerSalaryActualAndPrediction[order(-player
 
 # Make graph to show projected vs actual cap hit
 playerSalaryActualAndPrediction %>%
-  ggplot(aes(x = cap_hit,
-             y = projected_cap_hit)) +
+  ggplot(aes(x = projected_cap_hit,
+             y = cap_hit)) +
   geom_point(alpha = 0.3,
              color = "cornflowerblue") +
   geom_abline(slope = 1, 
