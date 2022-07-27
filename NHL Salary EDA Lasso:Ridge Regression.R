@@ -87,17 +87,29 @@ holdout_predictions <-
 
 # Compute the RMSE across folds with standard error intervals
 holdout_predictions %>%
-  pivot_longer(lm_preds:random_forest_preds, 
+  rename(`Cubist Model` = cubist_preds,
+         `Random Forest Model` = random_forest_preds,
+         `Linear Regression Model` = lm_preds,
+         `Intercept Only Model` = intercept_preds,
+         `Lasso Model` = lasso_preds,
+         `Ridge Model` = ridge_preds) %>%
+  pivot_longer(`Linear Regression Model`:`Random Forest Model`, 
                names_to = "type", values_to = "test_preds") %>%
   group_by(type, test_fold) %>%
   summarize(rmse =
               sqrt(mean((test_actual - test_preds) ** 2))) %>% 
   ggplot(aes(x = type, y = rmse)) + 
-  geom_point() + theme_bw() +
+  geom_point() + 
+  theme_bw() +
+  ggtitle("Cubist Model has the Best RMSE and the Model to Use") +
+  xlab("Type of Model") +
+  ylab("RMSE") +
   stat_summary(fun = mean, geom = "point", 
                color = "red") + 
   stat_summary(fun.data = mean_se, geom = "errorbar",
-               color = "red")
+               color = "red") +
+    theme(plot.title = element_text(hjust = 0.5,
+                                    face = "bold"))
 
 # Find the most important variables
 library(glmnet)
