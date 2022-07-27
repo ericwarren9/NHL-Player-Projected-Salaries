@@ -51,6 +51,8 @@ which.min(c(min(cv_en_25$cvm), min(cv_en_50$cvm), min(cv_en_75$cvm), min(cv_ridg
 set.seed(9)
 salaryAllSeasonsSubset <- salaryAllSeasonsSubset %>% mutate(test_fold = sample(rep(1:5, length.out = n())))
 library(purrr)
+library(Cubist)
+library(ranger)
 holdout_predictions <- 
   map_dfr(unique(salaryAllSeasonsSubset$test_fold), 
           function(holdout) {
@@ -62,24 +64,30 @@ holdout_predictions <-
             train_x <- as.matrix(dplyr::select(train_data, -cap_hit))
             # Train models:
             lm_model <- lm(cap_hit ~ ., data = train_data)
+            intercept_only_model <- lm(cap_hit ~ 1, data = train_data)
             ridge_model <- cv.glmnet(train_x, train_data$cap_hit, alpha = 0)
             lasso_model <- cv.glmnet(train_x, train_data$cap_hit, alpha = 1)
-            en_model <- cv.glmnet(train_x, train_data$cap_hit, alpha = .5)
-            quarter_model <- cv.glmnet(train_x, train_data$cap_hit, alpha = .25)
-            three_quarter_model <- cv.glmnet(train_x, train_data$cap_hit, alpha = .75)
+            cubist_model <- cubist(x = train_x,
+                                   y = train_data$cap_hit,
+                                   committees = 78,
+                                   neighbor = 3)
+            random_forest <- ranger(cap_hit ~ .,
+                                    train_data,
+                                    importance = "impurity",
+                                    mtry = ncol(train_data) / 3)
             # Return tibble of holdout results:
             tibble(lm_preds = predict(lm_model, newdata = test_data),
+                   intercept_preds = predict(intercept_only_model, newdata = test_data),
                    ridge_preds = as.numeric(predict(ridge_model, newx = test_x)),
                    lasso_preds = as.numeric(predict(lasso_model, newx = test_x)),
-                   en_preds = as.numeric(predict(en_model, newx = test_x)),
-                   quarter_preds = as.numeric(predict(quarter_model, newx = test_x)),
-                   three_quarter_preds = as.numeric(predict(three_quarter_model, newx = test_x)),
+                   cubist_preds = predict(cubist_model, newdata= test_data),
+                   random_forest_preds = as.numeric(predict(random_forest, data = test_data)$predictions),
                    test_actual = test_data$cap_hit, test_fold = holdout) 
           })
 
 # Compute the RMSE across folds with standard error intervals
 holdout_predictions %>%
-  pivot_longer(lm_preds:three_quarter_preds, 
+  pivot_longer(lm_preds:random_forest_preds, 
                names_to = "type", values_to = "test_preds") %>%
   group_by(type, test_fold) %>%
   summarize(rmse =
