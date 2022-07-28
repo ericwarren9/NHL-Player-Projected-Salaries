@@ -79,7 +79,7 @@ set.seed(9)
 model_tree_updated <- cubist(x = train_pred,
                      y = train_resp,
                      committees = 78,
-                     neighbor = 2)
+                     neighbor = 9)
 
 # Get the summary of the model
 summary(model_tree_updated)
@@ -129,6 +129,8 @@ playerSalaryActualAndPrediction %>%
 
 # Write csv to use for R Shiny App
 write_csv(playerSalaryActualAndPrediction, "UsedDataForProject/All Seasons Player Salary Projections Short Version.csv")
+
+write_csv(playerSalaryActualAndPrediction, "NHL_Player_Projected_Salaries/All Seasons Player Salary Projections Short Version.csv")
 
 # Write RDS to use for R Shiny App
 write_rds(playerSalaryActualAndPrediction, "UsedDataForProject/All Seasons Player Salary Projections Short Version.rds")
