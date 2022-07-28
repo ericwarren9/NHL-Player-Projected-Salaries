@@ -79,7 +79,7 @@ set.seed(9)
 model_tree_updated <- cubist(x = train_pred,
                      y = train_resp,
                      committees = 78,
-                     neighbor = 0)
+                     neighbor = 2)
 
 # Get the summary of the model
 summary(model_tree_updated)
