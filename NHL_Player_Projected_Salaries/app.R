@@ -72,9 +72,10 @@ ui <- fluidPage(
     div(span("Paying NHL Players What They Are Worth", style = "color:black", align = "center"),
         align = "center",
         br(),
-        span(em(h4("Players Must Have Played At Least 20 Games in a Season To Qualify"))),
-        span(em(h6("Seasons 2010-11 to 2015-16 Have Less Data Due to Insufficient Salary Tracking Data"))))
+        span(em(h6("Seasons 2010-11 to 2015-16 Have Less Data Due to Insufficient Salary Tracking Data")))), 
+    windowTitle =  "Paying NHL Players What They Are Worth"
   ),
+  shinytitle::use_shiny_title(),
   sidebarLayout(
     sidebarPanel(width = 2,
       checkboxGroupInput("show_vars_all", "Player Attributes to Show:",
@@ -94,7 +95,6 @@ ui <- fluidPage(
                        onItemAdd = I("function() {this.close();}")),
         multiple = T
       ),
-      br(),
       pickerInput(
         inputId = "position", 
         label = "Select Position(s)",
@@ -125,7 +125,8 @@ ui <- fluidPage(
   ),
     mainPanel(
       DT::dataTableOutput("mytable1"), 
-      plotlyOutput("plot1")
+      plotlyOutput("plot1"),
+      uiOutput("link")
     )
   )
 )
@@ -146,7 +147,8 @@ server <- function(input, output) {
   
   # Make the datatable
   output$mytable1 <- DT::renderDataTable({
-    DT::datatable(displayData()[, c(input$show_vars_all, "Projected Cap Hit Percentage", "Projected Cap Hit", "Actual Cap Hit", "Team Savings"), drop = FALSE]) %>%
+    DT::datatable(displayData()[, c(input$show_vars_all, "Projected Cap Hit Percentage", "Projected Cap Hit", "Actual Cap Hit", "Team Savings"), drop = FALSE],
+                  caption = "Players Must Have Played At Least 20 Games in a Season To Qualify") %>%
       formatCurrency(c("Projected Cap Hit", "Actual Cap Hit", "Team Savings"),
                      currency = "$", interval = 3, mark = ",") %>%
       formatPercentage("Projected Cap Hit Percentage", digits = 2)
@@ -192,6 +194,13 @@ server <- function(input, output) {
                             "Team Savings: ", scales::dollar(displayData()$`Team Savings`)
                             )
               )
+  })
+  
+  shinytitle::change_window_title(title = "Paying NHL Players What They Are Worth")
+  
+  linkToHTML <- a("Projected Salary Methodology", href = "https://rpubs.com/hsjens/927909")
+  output$link <- renderUI({
+    tagList(tags$h5("", linkToHTML))
   })
   
 }
