@@ -60,6 +60,7 @@ position_names <- c("D" = "Defense", "F" = "Forward")
 `Past Seasons Player Salaries`$Position <-
   as.character(position_names[`Past Seasons Player Salaries`$Position])
 position <- `Past Seasons Player Salaries`$Position
+actual_cap_hit <- `Past Seasons Player Salaries`$`Actual Cap Hit`
   
 
 
@@ -121,6 +122,13 @@ ui <- fluidPage(
                        onType = I("function (str) {if (str === \"\") {this.close();}}"),
                        onItemAdd = I("function() {this.close();}")),
         multiple = T
+      ),
+      sliderInput(
+        "cap_hit",
+        label = "Player's Actual Cap Hit",
+        min = min(unique(actual_cap_hit)),
+        max = max(unique(actual_cap_hit)),
+        value = c(min(unique(actual_cap_hit)), max(unique(actual_cap_hit)))
       )
   ),
     mainPanel(
@@ -142,7 +150,8 @@ server <- function(input, output) {
     `Past Seasons Player Salaries` %>%
       filter(Season %in% input$season,
              Team %in% input$team,
-             Position %in% input$position)
+             Position %in% input$position,
+             `Actual Cap Hit` %in% c(input$cap_hit[1]:input$cap_hit[2]))
   })
   
   # Make the datatable
