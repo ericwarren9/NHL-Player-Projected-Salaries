@@ -114,8 +114,8 @@ playerSalaryActualAndPrediction %>%
   geom_abline(slope = 1, 
               intercept = 0,
               color = "black") +
-  labs(x = "Actual Player Salaries (in USD)",
-       y = "Predicted Player Salaries (in USD)",
+  labs(x = "Predicted Player Salaries (in USD)",
+       y = "Actual Player Salaries (in USD)",
        title = "How Players Perform in Regards to Their Salary",
        color = "Team Savings") +
   scale_color_gradient(low = "darkblue",
