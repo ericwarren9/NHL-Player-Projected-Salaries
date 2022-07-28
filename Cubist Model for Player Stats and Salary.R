@@ -108,18 +108,24 @@ playerSalaryActualAndPrediction <- playerSalaryActualAndPrediction[order(-player
 # Make graph to show projected vs actual cap hit
 playerSalaryActualAndPrediction %>%
   ggplot(aes(x = projected_cap_hit,
-             y = cap_hit)) +
-  geom_point(alpha = 0.3,
-             color = "cornflowerblue") +
+             y = cap_hit,
+             color = projected_cap_hit - cap_hit)) +
+  geom_point(alpha = 0.3) +
   geom_abline(slope = 1, 
               intercept = 0,
-              color = "red") +
+              color = "black") +
   labs(x = "Actual Player Salaries (in USD)",
        y = "Predicted Player Salaries (in USD)",
-       title = "How Players Perform in Regards to Their Salary") +
-  scale_x_continuous(labels = scales::comma) +
-  scale_y_continuous(labels = scales::comma) +
-  theme_bw()
+       title = "How Players Perform in Regards to Their Salary",
+       color = "Team Savings") +
+  scale_color_gradient(low = "darkblue",
+                       high = "darkorange",
+                       labels = scales::dollar) +
+  scale_x_continuous(labels = scales::dollar) +
+  scale_y_continuous(labels = scales::dollar) +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5,
+                                  face = "bold"))
 
 # Write csv to use for R Shiny App
 write_csv(playerSalaryActualAndPrediction, "UsedDataForProject/All Seasons Player Salary Projections Short Version.csv")
