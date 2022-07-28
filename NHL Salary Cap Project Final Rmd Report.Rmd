@@ -1,0 +1,332 @@
+---
+title: "NHL Salary Cap Project"
+author: "Hailey Jensen and Eric Warren"
+date: '2022-07-29'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+```
+
+
+# Introduction 
+
+Our main research question is how to predict the annual salary of a National Hockey League (NHL) player based on their statistical outputs. The goal of our research is to produce a usable app to display past and present hockey seasons, and display the supposed “worth” of a player. Our model is trying to help league officials determine what a reasonable contract offer for a player should be in order to maximize a teams’ talent, but still maintain the salary cap restriction.
+
+In the National Hockey League, the top professional league in the world, all current teams must abide by something called a salary cap. This dollar amount is set by the league officials and determines the total most amount of money they can pay their entire roster. In the NHL they have 20 players (18 skaters and 2 goaltenders) and for the upcoming 2022-23 season, they can pay these 20 players a maximum of $82,500,000. Unlike in other sports, it is a “hard” cap, meaning you cannot go over the designated amount and there is no luxury tax a team can pay to get around it. This number varies per year and is calculated by the designated percentage, agreed in their collective bargaining agreement, of previous league revenue. 
+
+What motivated us to do this project is because we wanted to create a model that was as accurate as possible in predicting NHL player salary cap. We are very interested to see how players are paid vs. how much they are “worth”. This is a difficult question to answer because there is so much to take into account when predicting how much a player is worth; things we might not even have access to or quantifiable data for. That being said, it is still going to be very interesting to see what various aspects of a players upfront performance is taken into account when computing salary cap. We are going to be very intrigued by what our model predicts for some of our fan favorite players. 
+
+# Data {.tabset}
+
+## Our data
+
+We have used 3 different data sets throughout our research; taken from public sources: [MoneyPuck](https://moneypuck.com/data.htm), [Capfriendly](https://www.capfriendly.com/), and [fastRHockey](https://github.com/sportsdataverse/fastRhockey-data/tree/main/nhl/player_box/csv)
+  
+In our dataset there are 1446 different individual players that have played in the NHL from the 2010-11 season to the 2021-22 season. There are roughly 20 players per team, but the number of teams present in the league vary depending on the year. For example, in the 2017-2018 season the league went from 30 to 31 teams, and in the 2021-2022 season it went to 32. 
+
+A quick overview on some variables we used in our research; we decided upon examining situational data (i.e. 5on4, 5on5, etc.), goals, assists, blocks, varying types of shots (i.e. low danger, high danger, etc.), and various other offensive/ defensive statistics. In deciding these variables we simply went through each individual data set and manually picked out what we deemed to be important/ potential explanatory variables. Something to take note of is that our data is formatted to showcase within team statistics, not overall league stats. 
+
+```{r, echo = FALSE, message = FALSE, warning=FALSE}
+library(tidyverse)
+library(readr)
+S21_22 <- read_rds("data/NHL PLayer Stats and Salary 2021-22.rds")
+
+S21_22%>%
+  rename('cap hit' = cap_hit, 'games played' = games_played)%>%
+dplyr::select(player, position, team,'games played', 'cap hit')%>%
+  head()%>%
+  knitr::kable(caption = "NHL 2021-22 Season Stats")
+```
+
+
+## EDA
+
+We wanted to first look at the distribution of cap hit, for this we decided to stick with modeling a single season rather than every season together to avoid having repeated player values in the model. 
+
+```{r, echo = FALSE, message = FALSE, warning=FALSE}
+library(tidyverse)
+
+whole_data <- read_rds("data/NHL Player Stats and Salary Per 60 Minutes and Standardized 2010-22.rds")
+
+s21 <- whole_data [ which(whole_data$season=='2020-21'), ]
+
+playernames22 <- unique(s21$player)
+
+
+s21%>%
+  ggplot(aes(x = cap_hit))+
+  geom_histogram(bins = 15, 
+                 color = "cornflowerblue", 
+                 fill = "cornflowerblue",
+                 alpha = .22, 
+                 size = .65,
+                 aes(y=(..count..)/sum(..count..))) +
+  scale_x_continuous(labels=scales::dollar_format())+
+  scale_y_continuous(labels=scales::percent_format()) +
+  labs(title = "Distribution of Cap Hit for 2020-21 Season",
+       x = "Cap Hit in U.S. Dollars",
+       y = "Percentage of players") +
+  theme_bw()
+```
+
+We can see that majority of players (a little over 50%) are being paid around the $1,000,000 mark. 
+
+We now want to determine the minimal number of games to subset our data on. We performed an ECDF to statistically find the optimal number of games. 
+
+```{r, echo = FALSE, message = FALSE, warning=FALSE, out.width= '60%'}
+library(readr)
+whole_data <- read_rds("data/NHL Player Stats and Salary Per 60 Minutes and Standardized 2010-22.rds")
+
+whole_data %>%
+  ggplot(aes(x = games_played)) + 
+  stat_ecdf() +
+  theme_bw()
+```
+
+We found that a good number of games to subset by was 20, because roughly 75% of our data falls into those limits.
+
+# {-}
+
+# Methods {.tabset}
+
+## Model Options
+
+We considered, and tested, a few different modeling techniques. We observed linear regression, random forest, ridge regression, lasso, intercept only models, as well as a cubist regression model. We decided upon examining these specific models because our motivation is creating a predictive model, and these methods are all predictive modeling techniques. We first examined a linear regression, because it's the most interpretable predictive model. We used ridge and lasso models to inspect if collinearity is present and affecting our model in an adverse way. We used a random forest model because we wanted to see how variables are weighted and how they affect our model as a whole. The cubist regression model is very similar to random forest, but it approaches predictions differently. Lastly, we used the intercept-only model as a baseline to clarify that we did in fact have important predictor variables in our data.
+
+## Cubist Model
+
+We were advised to examine a cubist regression method for modeling players projected cap hit. As stated before, when being compared to other models' performances that we tested, the cubist model was by far the best model. 
+
+First a quick overview into what a cubist model is. A cubist regression model is an ensemble model of predictive trees (or random forest), where the paths, or “branches”, of each tree is a set of rules leading to a final leaf node. In each node the model performs linear regression and averages the nodes to create a prediction. This model also utilizes boosting, which allows us to calculate the optimal number of iterations, or trees, to use; in the cubist model the number of iterations is also known as committees. 
+
+Our tuning parameter in this model is identified as a “neighbor”. What a neighbor does is essentially determine how smooth our model is going to be, 0 being the smoothest 10 being the most fitted. So, we first want to determine which neighbor is best suited for our model.
+
+```{r,echo = FALSE, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(Cubist)
+library(purrr)
+
+salaryAllSeasonsReadIn <- read_rds("data/NHL Player Stats and Salary Per 60 Minutes and Standardized 2010-22.rds")%>%
+    filter(games_played >= 20,
+         cap_hit > 99999,
+         age != 0)
+
+salaryAllSeasons <- salaryAllSeasonsReadIn 
+
+salaryAllSeasons[sapply(salaryAllSeasons, is.character)] <- lapply(salaryAllSeasons[sapply(salaryAllSeasons, is.character)], as.factor)
+
+set.seed(9)
+in_train_set <- sample(1:nrow(salaryAllSeasons),
+                       floor(.8 * nrow(salaryAllSeasons)))
+
+predictors <- colnames(salaryAllSeasons %>% 
+                         select(-c(player,
+                                   cap_hit,
+                                   games_played,
+                                   total_cap,
+                                   percent_cap_hit)))
+
+train_pred <- salaryAllSeasons[in_train_set, predictors]
+test_pred <- salaryAllSeasons[-in_train_set, predictors]
+
+train_resp <- salaryAllSeasons$percent_cap_hit[in_train_set]
+test_resp <- salaryAllSeasons$percent_cap_hit[-in_train_set]
+
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+set.seed(9)
+model_tree <- cubist(x = train_pred,
+                     y = train_resp,
+                     committees = 78)
+
+neighbor <- NULL
+rmse <- NULL
+r_squared <- NULL
+
+for (i in 1:10) {
+  model_tree_pred <- predict(model_tree, 
+                             test_pred,
+                             neighbors = i-1)
+  rmse_value <- sqrt(mean(model_tree_pred - test_resp) ** 2)
+  r_square_value <- cor(model_tree_pred, test_resp) ** 2
+  neighbor[i] = i-1
+  rmse[i] = rmse_value
+  r_squared[i] = r_square_value
+}
+
+cubistModelResults <- as_tibble(cbind(neighbor, rmse, r_squared))
+cubistModelResults
+
+```
+
+We can see that the neighbor 9 is the best value due to having the lowest RMSE and respective $R^2$ value. We also computed the optimal number of committees and found it to be 78. Moving on, we can now produce a cubic regression model using our calculated parameters.
+
+Cubist regression references:
+https://cran.r-project.org/web/packages/Cubist/vignettes/cubist.html#ensembles-by-committees
+
+# {-}
+
+# Results {.tabset}
+
+```{r, echo = FALSE, message = FALSE, warning=FALSE}
+library(tidyverse)
+salaryAllSeasons <- read_rds("data/NHL Player Stats and Salary Per 60 Minutes and Standardized 2010-22.rds")
+
+library(stats)
+salaryAllSeasonsSubset <- salaryAllSeasons %>%
+  select(-c(player,
+            season)) %>%
+  filter(games_played >= 20,
+         type != "Entry_Level")
+salaryAllSeasonsSubset[sapply(salaryAllSeasonsSubset, is.character)] <- lapply(salaryAllSeasonsSubset[sapply(salaryAllSeasonsSubset, is.character)], as.factor)
+salaryAllSeasonsSubset[sapply(salaryAllSeasonsSubset, is.factor)] <- lapply(salaryAllSeasonsSubset[sapply(salaryAllSeasonsSubset, is.factor)], as.numeric)
+
+```
+
+```{r, echo = FALSE, message = FALSE, warning=FALSE}
+set.seed(9)
+salaryAllSeasonsSubset <- salaryAllSeasonsSubset %>% mutate(test_fold = sample(rep(1:5, length.out = n())))
+library(purrr)
+library(Cubist)
+library(ranger)
+library(glmnet)
+holdout_predictions <- 
+  map_dfr(unique(salaryAllSeasonsSubset$test_fold), 
+          function(holdout) {
+            test_data <- salaryAllSeasonsSubset %>% filter(test_fold == holdout)
+            train_data <- salaryAllSeasonsSubset %>% filter(test_fold != holdout)
+            test_x <- as.matrix(dplyr::select(test_data, -cap_hit))
+            train_x <- as.matrix(dplyr::select(train_data, -cap_hit))
+            lm_model <- lm(cap_hit ~ ., data = train_data)
+            intercept_only_model <- lm(cap_hit ~ 1, data = train_data)
+            ridge_model <- cv.glmnet(train_x, train_data$cap_hit, alpha = 0)
+            lasso_model <- cv.glmnet(train_x, train_data$cap_hit, alpha = 1)
+            cubist_model <- cubist(x = train_x,
+                                   y = train_data$cap_hit,
+                                   committees = 78,
+                                   neighbor = 3)
+            random_forest <- ranger(cap_hit ~ .,
+                                    train_data,
+                                    importance = "impurity",
+                                    mtry = ncol(train_data) / 3)
+            tibble(lm_preds = predict(lm_model, newdata = test_data),
+                   intercept_preds = predict(intercept_only_model, newdata = test_data),
+                   ridge_preds = as.numeric(predict(ridge_model, newx = test_x)),
+                   lasso_preds = as.numeric(predict(lasso_model, newx = test_x)),
+                   cubist_preds = predict(cubist_model, newdata= test_data),
+                   random_forest_preds = as.numeric(predict(random_forest, data = test_data)$predictions),
+                   test_actual = test_data$cap_hit, test_fold = holdout) 
+          })
+```
+```{r, echo=FALSE, message= FALSE, warning= FALSE, fig.width= 9, fig.height= 6 }
+holdout_predictions %>%
+  rename(`Cubist Model` = cubist_preds,
+         `Random Forest Model` = random_forest_preds,
+         `Linear Regression Model` = lm_preds,
+         `Intercept Only Model` = intercept_preds,
+         `Lasso Model` = lasso_preds,
+         `Ridge Model` = ridge_preds) %>%
+  pivot_longer(`Linear Regression Model`:`Random Forest Model`, 
+               names_to = "type", values_to = "test_preds") %>%
+  group_by(type, test_fold) %>%
+  summarize(rmse =
+              sqrt(mean((test_actual - test_preds) ** 2))) %>% 
+  ggplot(aes(x = reorder(type, rmse), y = rmse)) + 
+  geom_point() + 
+  theme_bw() +
+  ggtitle("Cubist Model has the Best RMSE and is the Model to Use") +
+  xlab("Type of Model") +
+  ylab("RMSE") +
+  stat_summary(fun = mean, geom = "point", 
+               color = "red") + 
+  stat_summary(fun.data = mean_se, geom = "errorbar",
+               color = "red") +
+  theme(plot.title = element_text(hjust = 0.5,
+                                  face = "bold"))
+```
+
+
+When looking at the compared RMSE values, we can determine that the cubist model performs the best in comparison to the other 5 models.
+
+Through the use of our cubist regression model we were able to showcase the comparison between predicted and actual salary.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+set.seed(9)
+model_tree_updated <- cubist(x = train_pred,
+                     y = train_resp,
+                     committees = 78,
+                     neighbor = 9)
+
+salaryAllSeasons$projected_percent_cap_hit <- predict(model_tree_updated, salaryAllSeasons)
+
+salaryAllSeasons <- salaryAllSeasons %>%
+  mutate(projected_cap_hit = round(projected_percent_cap_hit * total_cap, 2))
+
+playerSalaryActualAndPrediction <-
+  salaryAllSeasons %>% 
+  select(player,
+         team,
+         position,
+         season,
+         games_played,
+         age,
+         cap_hit,
+         projected_cap_hit,
+         projected_percent_cap_hit)
+
+playerSalaryActualAndPrediction <- playerSalaryActualAndPrediction[order(-playerSalaryActualAndPrediction$projected_cap_hit),]
+
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+playerSalaryActualAndPrediction %>%
+  ggplot(aes(x = projected_cap_hit,
+             y = cap_hit,
+             color = projected_cap_hit - cap_hit ))+
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, 
+              intercept = 0,
+              color = "black") +
+  labs(x = "Actual Player Salaries (in USD)",
+       y = "Predicted Player Salaries (in USD)",
+       title = "How Players Perform in Regards to Their Salary",
+       color = "Team Savings") +
+  scale_color_gradient(low = "darkblue",
+                       high = "darkorange",
+                       labels = scales::dollar)+
+  scale_x_continuous(labels = scales::dollar) +
+  scale_y_continuous(labels = scales::dollar) +
+  theme_bw()
+```
+
+We ended up creating an interactive [shiny](https://3foak4-eric-warren.shinyapps.io/nhl_player_projected_salaries/) app to show more in depth each player plotted above and their given attributes; such as percent cap hit, team savings, age, predicted cap hit, etc.. 
+
+Through the use of the shiny app/ model we can see the top 5 most overpaid players are:
+
+1. William Nylander (TOR – 2018-19) by $6.96 million
+1. Erik Karlsson (SJS – 2020-21) by $4.87 million
+1. Corey Perry (ANA – 2018-19) by $4.76 million
+1. Nick Schmaltz (ARI – 2021-22) by $4.49 million
+1. Zack Parise (MIN – 2020-21) by $4.42 million
+
+And our top 5 most underpaid players are:
+
+1. Joe Thorton (SJS – 2019-20) by $3.88 million
+1. Jonathan Marchessault (VGK – 2017-18) by $3.62 million
+1. Erik Gustafsson (ANA – 2018-19) by $3.59 million
+1. Jake Muzzin (LAK – 2014-15) $3.51 million
+1. BRyan Getzlaf (ANA – 2021-22) by $3.48 million
+
+# Discussion
+
+Some limitations we faced in our research/data include not having data for physical attributes; such as speed, agility, strength, leadership etc.. The NHL does not provide puck tracking data, so we might not be able to find out the outcome of "50-50 battles". There's not a lot of defensive metrics available, so the model could be skewed more so towards offensive players. In order to produce residual plots, we would have to create one for every individual node (which would be 33 plots in our final tree), which is insufficient for times’ sake. Furthermore, we have been unsuccessful in concluding whether or not our model has any assumptions; so assuming we did produce the residual plots, we don’t even have any assumptions to potentially violate. Overall, the cubist regression model is very new to us so there is a lot we could possibly expand upon in the future.
+
+We have a few things we would like to look into in the future as well. The first thing doubles as both a limitation and a potential step to use in the future;  to our knowledge, the committees (number of iterations/ trees produced) allowance only goes up to 100, but what if it doesn't? We would be curious to see how the model changes if we increased the committees value. We would like to potentially categorize our cap hit variable into “underpaid”, “on-par”, and “overpaid” rather than simply displaying the dollar amount of predicted vs. observed cap hit difference. We would also be curious as to what the model might look like had we not performed any data transformations (i.e. no standardization or normalization). We would like to look into going a different route and use our own calculated expected values for the predictive model. In terms of future work for our shiny app, it would be a nice feature to add in a "fill in the blank" section, allowing users to input potential values for different player statistics. 
+
+# Acknowledgements
+
+We would like to thank all of the people who had a hand in helping us throughout our research project such as Dr. Ron Yurko, our advisors: Ms. Katerina Wu and Mr. Caleb Pena, our TA's Meg Ellingwood, Nick Kissel, YJ Chloe, Wanshan Li, and Kenta Takatsu, and lastly, our cohort members 
