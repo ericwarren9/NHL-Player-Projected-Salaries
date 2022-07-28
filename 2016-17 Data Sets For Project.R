@@ -78,6 +78,10 @@ salaryCF16 <- salaryCF16 %>%
            `CAP HIT %`)) %>%
   filter(POS != "G")
 
+# Get rid of accents on players
+library(stringi)
+salaryCF16$PLAYER <- stri_trans_general(salaryCF16$PLAYER, id = "Latin-ASCII")
+
 # Make a new column to show if player is forward or defense
 library(stringr)
 # Make functions here
