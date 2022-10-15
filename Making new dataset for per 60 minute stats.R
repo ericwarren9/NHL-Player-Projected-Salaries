@@ -1149,6 +1149,8 @@ salaryAllSeasonsPer60Minutes[is.na(salaryAllSeasonsPer60Minutes)] = 0
 
 # Write csv file for per 60 minutes and standardized stats
 write_csv(salaryAllSeasonsPer60Minutes, "UsedDataForProject/NHL Player Stats and Salary Per 60 Minutes and Standardized 2010-22.csv")
+write_csv(salaryAllSeasonsPer60Minutes, "NHL_Player_Projected_Salaries/NHL Player Stats and Salary Per 60 Minutes and Standardized 2010-22.csv")
 
 # Write rds file for per 60 minutes and standardized stats
 write_rds(salaryAllSeasonsPer60Minutes, "UsedDataForProject/NHL Player Stats and Salary Per 60 Minutes and Standardized 2010-22.rds")
+write_rds(salaryAllSeasonsPer60Minutes, "NHL_Player_Projected_Salaries/NHL Player Stats and Salary Per 60 Minutes and Standardized 2010-22.rds")
