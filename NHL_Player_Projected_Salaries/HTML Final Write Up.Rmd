@@ -7,7 +7,9 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE,
+                      fig.width = 10,
+                      fig.height = 7)
 library(tidyverse)
 setwd("~/NHL-Player-Projected-Salaries/NHL_Player_Projected_Salaries")
 ```
@@ -36,10 +38,10 @@ library(tidyverse)
 library(readr)
 S21_22 <- read_rds("NHL Player Stats and Salary 2021-22.rds")
 
-S21_22%>%
+S21_22 %>%
   rename('cap hit' = cap_hit, 'games played' = games_played)%>%
 dplyr::select(player, position, team,'games played', 'cap hit')%>%
-  head()%>%
+  head() %>%
   knitr::kable(caption = "NHL 2021-22 Season Stats")
 ```
 
@@ -53,12 +55,12 @@ library(tidyverse)
 
 whole_data <- read_rds("NHL Player Stats and Salary Per 60 Minutes and Standardized 2010-22.rds")
 
-s21 <- whole_data [ which(whole_data$season=='2020-21'), ]
+s21 <- whole_data[which(whole_data$season=='2020-21'), ]
 
 playernames22 <- unique(s21$player)
 
 
-s21%>%
+s21 %>%
   ggplot(aes(x = cap_hit))+
   geom_histogram(bins = 15, 
                  color = "cornflowerblue", 
@@ -85,6 +87,9 @@ whole_data <- read_rds("NHL Player Stats and Salary Per 60 Minutes and Standardi
 whole_data %>%
   ggplot(aes(x = games_played)) + 
   stat_ecdf() +
+  labs(title = "Number of Games NHL Players Played from 2010-2022 Per Season",
+       x = "Number of Games Played",
+       y = "Frequency of Players Already Observed") +
   theme_bw()
 ```
 
