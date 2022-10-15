@@ -1,4 +1,4 @@
-# PURPOSE: To explore some of the data we have with the NHL player Stats and Their Salary For 2012-13 Season
+# PURPOSE: To explore some of the data we have with the NHL Player Stats and Their Salary For 2012-13 Season
 
 
 
@@ -14,33 +14,107 @@ library(tidyverse)
 # Load the Cap Friendly Data ----------------------------------------------
 
 
-# Input Cap Friendly Data
-salaryCF12 <- read_csv("RawData/CapFriendly 2012-13 Data.csv")
+# Make For Loop to get Cap Friendly Data
+salaryCF12 <- tibble()
+tempData <- tibble()
+for (i in 1:25) {
+  url <- paste0("https://www.capfriendly.com/browse/active/2013?stats-season=2022&display=caphit-percent,skater-individual-advanced-stats,skater-on-ice-advanced-stats,goalie-advanced-stats,type&hide=team,clauses,handed,salary&pg=", i)
+  
+  tempData <- (read_html(url) %>%
+                 html_nodes(xpath = '//*[@id="brwt"]') %>%
+                 html_table())[[1]]
+  tempData <- tempData %>% mutate_all(as.character)
+  
+  salaryCF12 <- bind_rows(salaryCF12, tempData)
+}
+
+# Get column names for data that need to be numeric but currently are character
+numericValues  <- salaryCF12 %>%
+  select(-c("PLAYER", "POS", "TOI", "TYPE", "EXPIRY", "CAP HIT", "CAP HIT %")) %>%
+  colnames()
+
+
+salaryCF12[, numericValues] <- lapply(salaryCF12[, numericValues],function(x){as.numeric(gsub(",", "", x))})
+
+# Convert the 'CAP HIT' to a numeric value
+salaryCF12$`CAP HIT` <- as.numeric(gsub('[$,]', '', salaryCF12$`CAP HIT`))
+
+# Convert the 'CAP HIT %' to a numeric value
+salaryCF12$`CAP HIT %` <- as.numeric(gsub("%", "", salaryCF12$`CAP HIT %`))
+
+# Change all percentages into decimals
+percentageValues <- salaryCF12 %>%
+  select(c("SF%", "CF%", "FF%", "xGF%", "CAP HIT %")) %>%
+  colnames()
+
+salaryCF12[, percentageValues] <- lapply(salaryCF12[, percentageValues],function(x){x / 120})
+
+# Convert the time on ice to seconds of game play
+library(lubridate)
+salaryCF12$TOI <- substr(salaryCF12$TOI, start = 1, stop = 5)
+time12 <- ms(salaryCF12$TOI)
+salaryCF12$TOI <- time12@minute * 60 + time12@.Data
+
+# Separate player name and Rank to use just player name
+salaryCF12 <- salaryCF12 %>%
+  separate(PLAYER, into = c("RANK", "PLAYER"), sep = "[0-9]+. ")  %>%
+  select(-RANK)
+
+# Decide what to keep now that other columns don't have
+salaryCF12 <- salaryCF12 %>%
+  select(c(PLAYER,
+           AGE,
+           POS,
+           `+/-`,
+           ixG60,
+           iSh60,
+           iCF60,
+           `SF%`,
+           `CF%`,
+           `xGF%`,
+           TYPE,
+           EXPIRY,
+           `CAP HIT`,
+           `CAP HIT %`)) %>%
+  filter(POS != "G")
+
+# Get rid of accents on players
+library(stringi)
+salaryCF12$PLAYER <- stri_trans_general(salaryCF12$PLAYER, id = "Latin-ASCII")
+
 # Make a new column to show if player is forward or defense
 library(stringr)
 # Make functions here
-firstposition <- function(playerposition){
-  unlist(str_split(playerposition, ","))[1]
+firstPosition <- function(playerPosition){
+  unlist(str_split(playerPosition, ","))[1]
 }
-realposition <- function(playerposition){
-  unlist(str_split(playerposition, "/"))[1]
+realPosition <- function(playerPosition){
+  unlist(str_split(playerPosition, "/"))[1]
 }
 #Change columns to what is needed
-salaryCF12$position <- sapply(salaryCF12$position, firstposition)
-salaryCF12$position <- sapply(salaryCF12$position, realposition)
-
+salaryCF12$POS <- sapply(salaryCF12$POS, firstPosition)
+salaryCF12$POS <- sapply(salaryCF12$POS, realPosition)
+# Make new columns for the position type
 salaryCF12 <- salaryCF12 %>%
-  mutate(position = ifelse(position %in% c("LW", "C", "RW"), "F", position),
-         position = ifelse(position %in% c("LD", "RD", "D"), "D", position))
+  mutate(position = ifelse(POS %in% c("LW", "C", "RW"), "F", POS),
+         position = ifelse(POS %in% c("LD", "RD", "D"), "D", position)) %>%
+  select(-POS) %>%
+  select(PLAYER, position, everything()) %>%
+  select(- c(contains("x"),
+             `CAP HIT %`,
+             contains("60"),
+             contains("%"),
+             `+/-`))
+
 
 
 # Load in the player data from MoneyPuck ----------------------------------
 
 
-salaryMPplayer12 <- read_csv("RawData/skatersMP2012-13.csv")
+salaryMPPlayer12 <- read_csv("RawData/skatersMP2012-13.csv")
 
 # Get rid of not needed variables
-salaryMPplayer12 <- salaryMPplayer12  %>%
+salaryMPPlayer12 <- salaryMPPlayer12  %>%
   mutate(assists = I_F_primaryAssists + I_F_secondaryAssists) %>%
   select(-c(playerId,
             season,
@@ -64,21 +138,21 @@ salaryMPplayer12 <- salaryMPplayer12  %>%
             I_F_secondaryAssists))
 
 # Make positions into forwards and defense
-salaryMPplayer12 <- salaryMPplayer12 %>%
+salaryMPPlayer12 <- salaryMPPlayer12 %>%
   mutate(position = ifelse(position %in% c("L", "C", "R"), "F", position)) %>%
-  rename(player = name) %>%
-  select(player, position, everything())
+  rename(PLAYER = name) %>%
+  select(PLAYER, position, everything())
 
 # Make difference variables needed for later
 
 # Do on ice vs off ice stats
-nhl_onIceStats  <- salaryMPplayer12 %>%
-  select(player,
+nhl_onIceStats  <- salaryMPPlayer12 %>%
+  select(PLAYER,
          position,
          games_played,
          situation,
          contains("onIce")) %>%
-  pivot_longer(cols = -c(player,
+  pivot_longer(cols = -c(PLAYER,
                          position,
                          games_played,
                          situation),
@@ -86,13 +160,13 @@ nhl_onIceStats  <- salaryMPplayer12 %>%
                values_to = "onIce_value") %>%
   mutate(nhl_stats = str_remove(nhl_stats, "onIce_"))
 
-nhl_offIceStats  <- salaryMPplayer12 %>%
-  select(player,
+nhl_offIceStats  <- salaryMPPlayer12 %>%
+  select(PLAYER,
          position,
          games_played,
          situation,
          contains("offIce")) %>%
-  pivot_longer(cols = -c(player,
+  pivot_longer(cols = -c(PLAYER,
                          position,
                          games_played,
                          situation),
@@ -102,7 +176,7 @@ nhl_offIceStats  <- salaryMPplayer12 %>%
 
 nhl_diff_table <- nhl_onIceStats %>%
   inner_join(nhl_offIceStats,
-             by = c("player",
+             by = c("PLAYER",
                     "position",
                     "games_played",
                     "situation",
@@ -110,7 +184,7 @@ nhl_diff_table <- nhl_onIceStats %>%
   mutate(value_diff = onIce_value - offIce_value)
 
 nhl_diff_table <- nhl_diff_table %>%
-  pivot_wider(id_cols = c("player",
+  pivot_wider(id_cols = c("PLAYER",
                           "position",
                           "games_played"),
               names_from = c(nhl_stats,
@@ -119,24 +193,24 @@ nhl_diff_table <- nhl_diff_table %>%
               values_from = value_diff)
 
 # On ice for and against difference
-nhl_onIceFStats  <- salaryMPplayer12 %>%
-  select(player,
+nhl_onIceFStats  <- salaryMPPlayer12 %>%
+  select(PLAYER,
          position,
          situation,
          contains("onIce_F")) %>%
-  pivot_longer(cols = -c(player,
+  pivot_longer(cols = -c(PLAYER,
                          position,
                          situation),
                names_to = "nhl_stats",
                values_to = "onIce_F_value") %>%
   mutate(nhl_stats = str_remove(nhl_stats, "OnIce_F_"))
 
-nhl_onIceAStats  <- salaryMPplayer12 %>%
-  select(player,
+nhl_onIceAStats  <- salaryMPPlayer12 %>%
+  select(PLAYER,
          position,
          situation,
          contains("onIce_A")) %>%
-  pivot_longer(cols = -c(player,
+  pivot_longer(cols = -c(PLAYER,
                          position,
                          situation),
                names_to = "nhl_stats",
@@ -145,14 +219,14 @@ nhl_onIceAStats  <- salaryMPplayer12 %>%
 
 nhl_onIce_diff_table <- nhl_onIceFStats %>%
   inner_join(nhl_onIceAStats,
-             by = c("player",
+             by = c("PLAYER",
                     "position",
                     "situation",
                     "nhl_stats")) %>%
   mutate(value_diff = onIce_F_value - onIce_A_value)
 
 nhl_onIce_diff_table <- nhl_onIce_diff_table %>%
-  pivot_wider(id_cols = c("player",
+  pivot_wider(id_cols = c("PLAYER",
                           "position"),
               names_from = c(nhl_stats,
                              situation),
@@ -161,7 +235,7 @@ nhl_onIce_diff_table <- nhl_onIce_diff_table %>%
 
 
 # Select needed variables
-salaryMPplayer12_neededVariables <- salaryMPplayer12 %>%
+salaryMPPlayer12_neededVariables <- salaryMPPlayer12 %>%
   mutate(diff_numberOfPenalty = penaltiesDrawn - penalties,
          diff_penaltyMinutes = penalityMinutesDrawn - penalityMinutes) %>%
   select(-c(contains("onIce"),
@@ -173,8 +247,8 @@ salaryMPplayer12_neededVariables <- salaryMPplayer12 %>%
             penaltiesDrawn))
 
 # Pivot data wider to get variables needed to merge
-salaryMPplayer12_neededVariables <- salaryMPplayer12_neededVariables %>%
-  pivot_wider(id_cols = c(player, 
+salaryMPPlayer12_neededVariables <- salaryMPPlayer12_neededVariables %>%
+  pivot_wider(id_cols = c(PLAYER, 
                           position,
                           team),
               names_from = situation,
@@ -182,12 +256,12 @@ salaryMPplayer12_neededVariables <- salaryMPplayer12_neededVariables %>%
               values_from = icetime:diff_penaltyMinutes)
 
 # Combine all the tables together into one big readable table
-finalData_salaryMPplayer12 <- nhl_diff_table %>%
+finalData_salaryMPPlayer12 <- nhl_diff_table %>%
   inner_join(nhl_onIce_diff_table,
-             by = c("player",
+             by = c("PLAYER",
                     "position")) %>%
-  inner_join(salaryMPplayer12_neededVariables,
-             by = c("player",
+  inner_join(salaryMPPlayer12_neededVariables,
+             by = c("PLAYER",
                     "position")) %>%
   select(-c(contains("other"),
             contains("x"),
@@ -237,16 +311,16 @@ salaryFastRplayer12 <- salaryFastRplayer12 %>%
   filter(position_abbreviation != "G") %>%
   mutate(position = ifelse(position_abbreviation %in% c("LW", "C", "RW"), "F", position_abbreviation)) %>%
   select(-position_abbreviation) %>%
-  rename(player = player_full_name) %>%
-  select(player, position, everything())
+  rename(PLAYER = player_full_name) %>%
+  select(PLAYER, position, everything())
 
 # Make sure there are no players duplicated in each game
-salaryFastRplayer12 <- salaryFastRplayer12[!duplicated(salaryFastRplayer12[c("player", "position", "game_id")]), ]
+salaryFastRplayer12 <- salaryFastRplayer12[!duplicated(salaryFastRplayer12[c("PLAYER", "position", "game_id")]), ]
 
 # Combine all the data for season total data
 salaryFastRplayer12 <- salaryFastRplayer12 %>%
   select(-game_id) %>%
-  group_by(player,
+  group_by(PLAYER,
            position,
            shoots_catches) %>%
   summarise(across(where(is.numeric), sum, na.rm = T),
@@ -259,14 +333,15 @@ salaryFastRplayer12 <- salaryFastRplayer12 %>%
 
 finalData_salary12 <- salaryCF12 %>%
   inner_join(salaryFastRplayer12,
-             by = c("player",
+             by = c("PLAYER",
                     "position")) %>%
-  inner_join(finalData_salaryMPplayer12,
-             by = c("player",
-                    "position")) 
+  inner_join(finalData_salaryMPPlayer12,
+             by = c("PLAYER",
+                    "position")) %>%
+  mutate(season = "2012-13")
 
 finalData_salary12 <- finalData_salary12 %>%
-  select(player,
+  select(PLAYER,
          position,
          team,
          season,
@@ -275,8 +350,13 @@ finalData_salary12 <- finalData_salary12 %>%
 # Clean the data needed to make good variable names
 library(janitor)
 finalData_salary12 <- clean_names(finalData_salary12) %>%
-  mutate(covid = "pre-covid") %>%
-  rename(plusMinus = plus_minus)
+  mutate(total_cap = 60000000,
+         percent_cap_hit = round(cap_hit / total_cap, 6),
+         covid = "pre-covid") %>%
+  rename(plusMinus = plus_minus) %>%
+  filter(percent_cap_hit <= 0.2) %>%
+  na.omit() %>%
+  distinct()
 
 
 # Write csv and rds files to be used for later projects ---------------------------------

@@ -350,7 +350,9 @@ finalData_salary21 <- clean_names(finalData_salary21) %>%
   rename(plusMinus = x) %>%
   mutate(total_cap = 81500000,
          percent_cap_hit = round(cap_hit / total_cap, 6),
-         covid = "post-covid")
+         covid = "post-covid") %>%
+  na.omit() %>%
+  distinct()
 
 
 # Write csv and rds files to be used for later projects ---------------------------------
@@ -358,3 +360,7 @@ finalData_salary21 <- clean_names(finalData_salary21) %>%
 write_csv(finalData_salary21, "UsedDataForProject/NHL Player Stats and Salary 2021-22.csv")
 
 write_rds(finalData_salary21, "UsedDataForProject/NHL Player Stats and Salary 2021-22.rds")
+
+write_csv(finalData_salary21, "NHL_Player_Projected_Salaries/NHL Player Stats and Salary 2021-22.csv")
+
+write_rds(finalData_salary21, "NHL_Player_Projected_Salaries/NHL Player Stats and Salary 2021-22.rds")

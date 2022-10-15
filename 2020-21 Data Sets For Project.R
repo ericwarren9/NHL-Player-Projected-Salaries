@@ -350,7 +350,9 @@ finalData_salary20 <- clean_names(finalData_salary20) %>%
   rename(plusMinus = x) %>%
   mutate(total_cap = 81500000,
          percent_cap_hit = round(cap_hit / total_cap, 6),
-         covid = "post-covid")
+         covid = "post-covid") %>%
+  na.omit() %>%
+  distinct()
 
 
 # Write csv and rds files to be used for later projects ---------------------------------
