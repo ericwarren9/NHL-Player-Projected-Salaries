@@ -10,7 +10,6 @@
 
 # Put needed data in ------------------------------------------------------
 
-
 library(shiny)
 library(bslib)
 library(tidyverse)
@@ -61,6 +60,7 @@ position_names <- c("D" = "Defense", "F" = "Forward")
   as.character(position_names[`Past Seasons Player Salaries`$Position])
 position <- `Past Seasons Player Salaries`$Position
 actual_cap_hit <- `Past Seasons Player Salaries`$`Actual Cap Hit`
+age <- `Past Seasons Player Salaries`$Age
   
 
 
@@ -73,7 +73,7 @@ ui <- fluidPage(
     div(span("Paying NHL Players What They Are Worth", style = "color:black", align = "center"),
         align = "center",
         br(),
-        span(em(h6("Seasons 2010-11 to 2015-16 Have Less Data Due to Insufficient Salary Tracking Data")))), 
+        ), 
     windowTitle =  "Paying NHL Players What They Are Worth"
   ),
   shinytitle::use_shiny_title(),
@@ -129,12 +129,28 @@ ui <- fluidPage(
         min = min(unique(actual_cap_hit)),
         max = max(unique(actual_cap_hit)),
         value = c(min(unique(actual_cap_hit)), max(unique(actual_cap_hit)))
+      ),
+      sliderInput(
+        "age",
+        label = "Player's Age (as of July 1st before season starts)",
+        min = min(unique(age)),
+        max = max(unique(age)),
+        value = c(min(unique(age)), max(unique(age)))
       )
   ),
     mainPanel(
-      DT::dataTableOutput("mytable1"), 
-      plotlyOutput("plot1"),
-      uiOutput("link")
+      tabsetPanel(
+        type = "tabs",
+        tabPanel(
+          "Player Table", DT::dataTableOutput("mytable1")
+        ),
+        tabPanel(
+          "Plot of Player Salaries", plotlyOutput("plot1")
+        ),
+        tabPanel(
+          "Methodology Behind Project", uiOutput("html")
+        )
+      )
     )
   )
 )
@@ -151,7 +167,8 @@ server <- function(input, output) {
       filter(Season %in% input$season,
              Team %in% input$team,
              Position %in% input$position,
-             `Actual Cap Hit` %in% c(input$cap_hit[1]:input$cap_hit[2]))
+             `Actual Cap Hit` %in% c(input$cap_hit[1]:input$cap_hit[2]),
+             Age %in% c(input$age[1]:input$age[2]))
   })
   
   # Make the datatable
@@ -207,11 +224,9 @@ server <- function(input, output) {
   
   shinytitle::change_window_title(title = "Paying NHL Players What They Are Worth")
   
-  linkToHTML <- a("Projected Salary Methodology", href = "https://rpubs.com/hsjens/927909")
-  output$link <- renderUI({
-    tagList(tags$h5("", linkToHTML))
+  output$html <- renderUI({
+    HTML(readLines("HTML-Final-Write-Up.html"))
   })
-  
 }
 
 shinyApp(ui, server)
