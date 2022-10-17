@@ -17,6 +17,7 @@ library(DT)
 library(ggthemes)
 library(plotly)
 library(shinyWidgets)
+library(knitr)
 
 `Past Seasons Player Salaries` <- read_csv("All Seasons Player Salary Projections Short Version.csv") %>%
   mutate(team = gsub('L.A', 'LAK', team),
@@ -225,7 +226,7 @@ server <- function(input, output) {
   shinytitle::change_window_title(title = "Paying NHL Players What They Are Worth")
   
   output$html <- renderUI({
-    HTML(readLines("HTML-Final-Write-Up.html"))
+    includeHTML("HTML-Final-Write-Up.html")
   })
 }
 

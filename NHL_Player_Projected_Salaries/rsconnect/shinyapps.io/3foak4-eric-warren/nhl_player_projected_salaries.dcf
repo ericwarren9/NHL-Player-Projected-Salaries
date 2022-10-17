@@ -4,8 +4,8 @@ username:
 account: 3foak4-eric-warren
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
-appId: 7317104
-bundleId: 6406501
+appId: 7317460
+bundleId: 6406593
 url: https://3foak4-eric-warren.shinyapps.io/nhl_player_projected_salaries/
-when: 1665856329.53174
-lastSyncTime: 1665856329.53175
+when: 1665861742.81561
+lastSyncTime: 1665861742.81562
